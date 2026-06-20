@@ -1,0 +1,1763 @@
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocabulary Game – Decentralization</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+*{font-family:'Be Vietnam Pro',sans-serif;box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0}
+:root{--bg:#A8DADC;--white:#FFFFFF;--pink:#FFAFCC;--dark:#1a2a3a;--accent:#457B9D;--success:#2ecc71;--error:#e74c3c}
+.fade-in{animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card-hover{transition:transform .2s,box-shadow .2s}
+.card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.12)}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary:hover{filter:brightness(1.1);transform:scale(1.03)}
+.btn-pink{background:var(--pink);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-pink:hover{filter:brightness(.95);transform:scale(1.03)}
+.progress-bar{height:8px;background:#e0e0e0;border-radius:9999px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--pink));border-radius:9999px;transition:width .5s ease}
+.option-btn{border:2px solid #ddd;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .2s;background:#fff;text-align:left;width:100%;font-size:15px}
+.option-btn:hover{border-color:var(--accent);background:#f0f8ff}
+.option-btn.correct{border-color:var(--success);background:#d4edda;animation:pulse .4s}
+.option-btn.wrong{border-color:var(--error);background:#f8d7da}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.confetti{position:fixed;pointer-events:none;z-index:9999}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.input-field{border:2px solid #ddd;border-radius:12px;padding:12px 16px;font-size:16px;width:100%;transition:border-color .2s;outline:none}
+.input-field:focus{border-color:var(--accent)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;color:#fff;font-weight:600;z-index:9999;animation:toastIn .4s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.vocab-card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;border-left:4px solid var(--accent)}
+.section-tag{font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.match-item{border:2px solid #ddd;border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s;background:#fff;font-size:14px}
+.match-item.selected{border-color:var(--accent);background:#e8f4f8}
+.match-item.matched{border-color:var(--success);background:#d4edda;pointer-events:none}
+.match-item.wrong-match{border-color:var(--error);background:#f8d7da}
+.spinner{width:40px;height:40px;border:3px solid #e0e0e0;border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+ </head>
+ <body class="h-full" style="background:linear-gradient(135deg,#A8DADC 0%,#e8f4f8 50%,#FFAFCC33 100%)">
+  <div id="app" class="h-full w-full overflow-auto"></div>
+  <script>
+console.log("✅ Game initialized – Vocabulary Decentralization");
+
+// ===== VOCABULARY DATABASE =====
+// Chủ đề: Decentralization – IELTS 7.0 Target
+const VOCAB = [
+  {
+    id:1, en:'mitigate overcrowding', ipa:'/ˈmɪt.ɪ.ɡeɪt ˌəʊ.vəˈkraʊ.dɪŋ/', pos:'v phrase',
+    vi:'Giảm quá tải dân số',
+    enDef:'To reduce or lessen the effects of excessive population density in an area',
+    collocations:['mitigate overcrowding in cities','policies to mitigate overcrowding','mitigate urban overcrowding','help mitigate overcrowding'],
+    collocationVi:['giảm quá tải dân số ở đô thị','chính sách giảm quá tải','giảm quá tải đô thị','giúp giảm quá tải dân số'],
+    synonyms:['reduce congestion','ease population pressure','relieve crowding'],
+    synonymsVi:['giảm tắc nghẽn','giảm áp lực dân số','giảm mật độ đông đúc'],
+    antonyms:['worsen overcrowding','increase density','aggravate congestion'],
+    antonymsVi:['làm trầm trọng thêm quá tải','tăng mật độ','làm tệ hơn tình trạng tắc nghẽn'],
+    wordFamily:['mitigate (v)','mitigation (n)','overcrowded (adj)','overcrowding (n)'],
+    wordFamilyVi:['giảm nhẹ (động từ)','sự giảm nhẹ (danh từ)','đông đúc quá mức (tính từ)','sự quá tải (danh từ)'],
+    example:'"Decentralization policies help mitigate overcrowding in major metropolitan areas."',
+    exampleVi:'"Các chính sách phân quyền giúp giảm quá tải dân số tại các đô thị lớn."',
+    usage:'mitigate + overcrowding / pressure / effects'
+  },
+  {
+    id:2, en:'reduce pressure on housing', ipa:'/rɪˈdjuːs ˈpreʃ.ər ɒn ˈhaʊ.zɪŋ/', pos:'v phrase',
+    vi:'Giảm áp lực lên nhà ở',
+    enDef:'To lessen the strain on housing supply caused by high urban population demand',
+    collocations:['reduce pressure on housing systems','reduce housing pressure significantly','reduce pressure on urban housing','help reduce pressure'],
+    collocationVi:['giảm áp lực lên hệ thống nhà ở','giảm đáng kể áp lực nhà ở','giảm áp lực nhà ở đô thị','giúp giảm áp lực'],
+    synonyms:['ease housing demand','relieve housing shortage','lessen housing burden'],
+    synonymsVi:['giảm nhu cầu nhà ở','giảm tình trạng thiếu nhà','giảm gánh nặng nhà ở'],
+    antonyms:['increase housing pressure','worsen housing shortage','strain housing supply'],
+    antonymsVi:['tăng áp lực nhà ở','làm trầm trọng thêm thiếu nhà','gây áp lực lên nguồn cung nhà ở'],
+    wordFamily:['pressure (n)','pressurize (v)','housing (n)','reduce (v)'],
+    wordFamilyVi:['áp lực (danh từ)','tạo áp lực (động từ)','nhà ở (danh từ)','giảm (động từ)'],
+    example:'"Moving government offices to smaller cities can significantly reduce pressure on housing in the capital."',
+    exampleVi:'"Chuyển các văn phòng chính phủ đến các thành phố nhỏ hơn có thể giảm đáng kể áp lực lên nhà ở ở thủ đô."',
+    usage:'reduce pressure on + N'
+  },
+  {
+    id:3, en:'traffic congestion', ipa:'/ˈtræf.ɪk kənˈdʒes.tʃən/', pos:'n',
+    vi:'Tắc nghẽn giao thông',
+    enDef:'The state of roads being so full of vehicles that traffic moves very slowly or not at all',
+    collocations:['severe traffic congestion','ease traffic congestion','traffic congestion in peak hours','cause traffic congestion'],
+    collocationVi:['tắc nghẽn giao thông nghiêm trọng','giảm tắc nghẽn giao thông','tắc nghẽn vào giờ cao điểm','gây tắc nghẽn giao thông'],
+    synonyms:['gridlock','traffic jam','road congestion','heavy traffic'],
+    synonymsVi:['kẹt xe hoàn toàn','kẹt xe','tắc đường','giao thông đông đúc'],
+    antonyms:['free-flowing traffic','clear roads','smooth traffic'],
+    antonymsVi:['giao thông thông thoáng','đường thông','giao thông suôn sẻ'],
+    wordFamily:['congested (adj)','congest (v)','congestion (n)'],
+    wordFamilyVi:['tắc nghẽn (tính từ)','làm tắc nghẽn (động từ)','sự tắc nghẽn (danh từ)'],
+    example:'"Traffic congestion is a major urban issue that decentralization aims to address."',
+    exampleVi:'"Tắc nghẽn giao thông là vấn đề đô thị lớn mà phân quyền nhằm giải quyết."'
+  },
+  {
+    id:4, en:'land and property prices', ipa:'/lænd ænd ˈprɒp.ə.ti ˈpraɪ.sɪz/', pos:'n phrase',
+    vi:'Giá đất và bất động sản',
+    enDef:'The monetary value of land plots and real estate in a given location',
+    collocations:['rising land and property prices','lower land and property prices','land and property prices in rural areas','regulate land prices'],
+    collocationVi:['giá đất và bất động sản tăng','giá đất và bất động sản thấp hơn','giá đất ở vùng nông thôn','điều tiết giá đất'],
+    synonyms:['real estate costs','property values','housing prices','land costs'],
+    synonymsVi:['chi phí bất động sản','giá trị tài sản','giá nhà ở','chi phí đất đai'],
+    antonyms:['affordable land','subsidized property','cheap real estate'],
+    antonymsVi:['đất giá rẻ','bất động sản được trợ cấp','bất động sản giá rẻ'],
+    wordFamily:['property (n)','proprietor (n)','land (n)','price (n/v)'],
+    wordFamilyVi:['tài sản (danh từ)','chủ sở hữu (danh từ)','đất đai (danh từ)','giá/định giá (danh từ/động từ)'],
+    example:'"Land and property prices in rural areas are typically much lower than in major cities."',
+    exampleVi:'"Giá đất và bất động sản ở vùng nông thôn thường thấp hơn nhiều so với các thành phố lớn."'
+  },
+  {
+    id:5, en:'reduced costs', ipa:'/rɪˈdjuːst kɒsts/', pos:'n phrase',
+    vi:'Chi phí giảm',
+    enDef:'Lower expenses resulting from moving to or operating in areas with cheaper resources',
+    collocations:['reduced operating costs','significantly reduced costs','enjoy reduced costs','lead to reduced costs'],
+    collocationVi:['chi phí vận hành giảm','chi phí giảm đáng kể','hưởng chi phí giảm','dẫn đến chi phí giảm'],
+    synonyms:['lower costs','cost savings','cheaper expenses','cost reduction'],
+    synonymsVi:['chi phí thấp hơn','tiết kiệm chi phí','chi tiêu rẻ hơn','giảm chi phí'],
+    antonyms:['increased costs','higher expenses','rising costs','cost overruns'],
+    antonymsVi:['chi phí tăng','chi tiêu cao hơn','chi phí tăng','vượt chi phí'],
+    wordFamily:['reduce (v)','reduction (n)','cost (n)','cost-effective (adj)'],
+    wordFamilyVi:['giảm (động từ)','sự giảm (danh từ)','chi phí (danh từ)','tiết kiệm chi phí (tính từ)'],
+    example:'"Businesses relocating to suburban areas benefit from reduced costs in rent and labor."',
+    exampleVi:'"Các doanh nghiệp chuyển đến vùng ngoại ô được hưởng lợi từ chi phí giảm về thuê mặt bằng và lao động."'
+  },
+  {
+    id:6, en:'infrastructure improvements', ipa:'/ˈɪn.frəˌstrʌk.tʃər ɪmˈpruːv.mənts/', pos:'n phrase',
+    vi:'Cải thiện cơ sở hạ tầng',
+    enDef:'Enhancements made to basic physical systems like roads, utilities, and public services in an area',
+    collocations:['infrastructure improvements in rural areas','fund infrastructure improvements','major infrastructure improvements','infrastructure improvements boost growth'],
+    collocationVi:['cải thiện hạ tầng ở nông thôn','tài trợ cải thiện hạ tầng','cải thiện hạ tầng lớn','cải thiện hạ tầng thúc đẩy tăng trưởng'],
+    synonyms:['infrastructure development','public works upgrades','facility enhancements'],
+    synonymsVi:['phát triển hạ tầng','nâng cấp công trình công cộng','cải thiện cơ sở vật chất'],
+    antonyms:['infrastructure neglect','deteriorating infrastructure','underfunded systems'],
+    antonymsVi:['bỏ bê hạ tầng','hạ tầng xuống cấp','hệ thống thiếu vốn'],
+    wordFamily:['infrastructure (n)','improve (v)','improvement (n)','improved (adj)'],
+    wordFamilyVi:['cơ sở hạ tầng (danh từ)','cải thiện (động từ)','sự cải thiện (danh từ)','được cải thiện (tính từ)'],
+    example:'"Infrastructure improvements in smaller cities attract businesses and residents away from overcrowded capitals."',
+    exampleVi:'"Cải thiện cơ sở hạ tầng ở các thành phố nhỏ thu hút doanh nghiệp và cư dân rời khỏi các thủ đô quá tải."',
+    usage:'infrastructure improvements in / to + N'
+  },
+  {
+    id:7, en:'elevate living standards', ipa:'/ˈel.ɪ.veɪt ˈlɪv.ɪŋ ˈstæn.dədz/', pos:'v phrase',
+    vi:'Nâng cao mức sống',
+    enDef:'To raise the quality of life and material well-being of people in a region',
+    collocations:['elevate living standards in rural areas','policies that elevate living standards','elevate living standards significantly','help elevate standards'],
+    collocationVi:['nâng cao mức sống ở nông thôn','chính sách nâng cao mức sống','nâng cao đáng kể mức sống','giúp nâng cao tiêu chuẩn'],
+    synonyms:['improve quality of life','raise living standards','enhance well-being','boost welfare'],
+    synonymsVi:['cải thiện chất lượng cuộc sống','nâng cao mức sống','tăng cường phúc lợi','thúc đẩy phúc lợi'],
+    antonyms:['lower living standards','reduce quality of life','diminish well-being'],
+    antonymsVi:['hạ thấp mức sống','giảm chất lượng cuộc sống','làm giảm phúc lợi'],
+    wordFamily:['elevate (v)','elevation (n)','standard (n)','living (adj/n)'],
+    wordFamilyVi:['nâng cao (động từ)','sự nâng cao (danh từ)','tiêu chuẩn (danh từ)','sống/cuộc sống (tính từ/danh từ)'],
+    example:'"Decentralization can elevate living standards in underdeveloped regions by bringing investment and jobs."',
+    exampleVi:'"Phân quyền có thể nâng cao mức sống ở các vùng kém phát triển bằng cách thu hút đầu tư và tạo việc làm."',
+    usage:'elevate + living standards / quality of life'
+  },
+  {
+    id:8, en:'an influx of businesses', ipa:'/ən ˈɪn.flʌks əv ˈbɪz.nɪ.sɪz/', pos:'n phrase',
+    vi:'Làn sóng doanh nghiệp đổ về',
+    enDef:'A large number of companies arriving in or moving to a new location in a short period',
+    collocations:['an influx of businesses into rural areas','attract an influx of businesses','sudden influx of businesses','an influx of foreign businesses'],
+    collocationVi:['làn sóng doanh nghiệp đổ về nông thôn','thu hút làn sóng doanh nghiệp','làn sóng đột ngột của doanh nghiệp','làn sóng doanh nghiệp nước ngoài'],
+    synonyms:['a wave of businesses','business migration','a rush of companies','business influx'],
+    synonymsVi:['làn sóng doanh nghiệp','di cư doanh nghiệp','dòng công ty đổ về','sự đổ về của doanh nghiệp'],
+    antonyms:['business exodus','company departures','business flight'],
+    antonymsVi:['làn sóng doanh nghiệp rời đi','sự rút lui của công ty','dòng doanh nghiệp bỏ đi'],
+    wordFamily:['influx (n)','inflow (n)','business (n)','relocate (v)'],
+    wordFamilyVi:['làn sóng đổ vào (danh từ)','dòng chảy vào (danh từ)','doanh nghiệp (danh từ)','di dời (động từ)'],
+    example:'"Incentive policies led to an influx of businesses moving to the new economic zone."',
+    exampleVi:'"Các chính sách ưu đãi dẫn đến làn sóng doanh nghiệp chuyển đến khu kinh tế mới."',
+    usage:'an influx of + N (people / businesses / tourists)'
+  },
+  {
+    id:9, en:'put a strain on resources', ipa:'/pʊt ə streɪn ɒn rɪˈzɔː.sɪz/', pos:'v phrase',
+    vi:'Gây áp lực lên tài nguyên',
+    enDef:'To place excessive demand on available resources, infrastructure, or services',
+    collocations:['put a strain on local resources','put a strain on public services','put a strain on infrastructure','put a severe strain on'],
+    collocationVi:['gây áp lực lên tài nguyên địa phương','gây áp lực lên dịch vụ công','gây áp lực lên cơ sở hạ tầng','gây áp lực nghiêm trọng lên'],
+    synonyms:['overburden resources','overwhelm facilities','tax the system','overload capacity'],
+    synonymsVi:['làm quá tải tài nguyên','áp đảo cơ sở vật chất','tạo gánh nặng cho hệ thống','quá tải công suất'],
+    antonyms:['ease pressure on resources','relieve strain','support resources'],
+    antonymsVi:['giảm áp lực lên tài nguyên','giảm bớt căng thẳng','hỗ trợ tài nguyên'],
+    wordFamily:['strain (n/v)','resource (n)','put (v)'],
+    wordFamilyVi:['áp lực/gây áp lực (danh từ/động từ)','tài nguyên (danh từ)','đặt/gây ra (động từ)'],
+    example:'"Rapid population growth in small towns can put a strain on resources and local services."',
+    exampleVi:'"Tăng trưởng dân số nhanh ở các thị trấn nhỏ có thể gây áp lực lên tài nguyên và dịch vụ địa phương."',
+    usage:'put a strain on + N'
+  },
+  {
+    id:10, en:'rising rental prices', ipa:'/ˈraɪ.zɪŋ ˈren.təl ˈpraɪ.sɪz/', pos:'n phrase',
+    vi:'Giá thuê tăng',
+    enDef:'Increasing costs for renting homes or commercial spaces, often driven by high demand',
+    collocations:['rising rental prices in cities','rising rental prices due to demand','combat rising rental prices','rising rental prices affect workers'],
+    collocationVi:['giá thuê tăng ở các thành phố','giá thuê tăng do nhu cầu','chống lại giá thuê tăng','giá thuê tăng ảnh hưởng đến người lao động'],
+    synonyms:['soaring rents','increasing rental costs','climbing property rates','escalating rent'],
+    synonymsVi:['giá thuê tăng vọt','chi phí thuê tăng','tỷ lệ tài sản leo thang','giá thuê leo thang'],
+    antonyms:['falling rental prices','affordable rents','stable rental market'],
+    antonymsVi:['giá thuê giảm','giá thuê chấp nhận được','thị trường cho thuê ổn định'],
+    wordFamily:['rent (n/v)','rental (n/adj)','price (n)','rise (v)'],
+    wordFamilyVi:['tiền thuê (danh từ/động từ)','thuê/cho thuê (danh từ/tính từ)','giá (danh từ)','tăng (động từ)'],
+    example:'"Rising rental prices in the capital are forcing many workers to seek accommodation in surrounding areas."',
+    exampleVi:'"Giá thuê tăng ở thủ đô đang buộc nhiều người lao động tìm chỗ ở ở các vùng lân cận."'
+  },
+  {
+    id:11, en:'shift problems', ipa:'/ʃɪft ˈprɒb.ləmz/', pos:'v phrase',
+    vi:'Chuyển vấn đề',
+    enDef:'To transfer difficulties or challenges from one location or context to another rather than solving them',
+    collocations:['shift problems to rural areas','shift problems elsewhere','merely shift problems','shift the burden of problems'],
+    collocationVi:['chuyển vấn đề sang vùng nông thôn','chuyển vấn đề sang nơi khác','chỉ chuyển vấn đề','chuyển gánh nặng vấn đề'],
+    synonyms:['transfer problems','displace issues','relocate difficulties','move problems'],
+    synonymsVi:['chuyển giao vấn đề','di dời vấn đề','chuyển khó khăn','dịch chuyển vấn đề'],
+    antonyms:['solve problems','address root causes','resolve issues','fix problems'],
+    antonymsVi:['giải quyết vấn đề','giải quyết nguyên nhân gốc rễ','giải quyết các vấn đề','khắc phục vấn đề'],
+    wordFamily:['shift (n/v)','problem (n)','problematic (adj)'],
+    wordFamilyVi:['sự dịch chuyển/dịch chuyển (danh từ/động từ)','vấn đề (danh từ)','có vấn đề (tính từ)'],
+    example:'"Critics argue that decentralization merely shifts problems from cities to smaller towns without solving them."',
+    exampleVi:'"Các nhà phê bình cho rằng phân quyền chỉ chuyển vấn đề từ thành phố sang các thị trấn nhỏ mà không giải quyết được chúng."',
+    usage:'shift + problems / burden / responsibility'
+  },
+  {
+    id:12, en:'incur additional costs', ipa:'/ɪnˈkɜːr əˈdɪʃ.ə.nəl kɒsts/', pos:'v phrase',
+    vi:'Phát sinh chi phí bổ sung',
+    enDef:'To bring upon oneself extra expenses, especially unexpected or unavoidable ones during relocation',
+    collocations:['incur additional costs when relocating','incur significant additional costs','incur costs due to distance','businesses incur additional costs'],
+    collocationVi:['phát sinh chi phí khi di dời','phát sinh chi phí bổ sung đáng kể','phát sinh chi phí do khoảng cách','doanh nghiệp phát sinh chi phí bổ sung'],
+    synonyms:['face extra expenses','bear additional costs','take on more costs','encounter new costs'],
+    synonymsVi:['đối mặt với chi phí bổ sung','chịu chi phí thêm','gánh thêm chi phí','gặp phải chi phí mới'],
+    antonyms:['save money','reduce costs','avoid extra expenses','cut costs'],
+    antonymsVi:['tiết kiệm tiền','giảm chi phí','tránh chi phí bổ sung','cắt giảm chi phí'],
+    wordFamily:['incur (v)','cost (n)','additional (adj)','expenditure (n)'],
+    wordFamilyVi:['phát sinh (động từ)','chi phí (danh từ)','bổ sung (tính từ)','chi tiêu (danh từ)'],
+    example:'"Companies that relocate to new regions may incur additional costs for building new supply chains."',
+    exampleVi:'"Các công ty di dời đến các vùng mới có thể phát sinh chi phí bổ sung để xây dựng chuỗi cung ứng mới."',
+    usage:'incur + costs / losses / expenses'
+  },
+  {
+    id:13, en:'construct facilities from scratch', ipa:'/kənˈstrʌkt fəˈsɪl.ɪ.tɪz frɒm skrætʃ/', pos:'v phrase',
+    vi:'Xây dựng cơ sở vật chất từ đầu',
+    enDef:'To build or create all necessary physical facilities starting from nothing, with no existing structures',
+    collocations:['construct facilities from scratch in new areas','forced to construct from scratch','construct offices from scratch','build infrastructure from scratch'],
+    collocationVi:['xây dựng cơ sở từ đầu ở vùng mới','buộc phải xây từ đầu','xây dựng văn phòng từ đầu','xây dựng hạ tầng từ đầu'],
+    synonyms:['build from the ground up','create new infrastructure','develop anew','start from zero'],
+    synonymsVi:['xây từ nền móng','tạo hạ tầng mới','phát triển lại','bắt đầu từ không'],
+    antonyms:['renovate existing buildings','refurbish facilities','use existing infrastructure'],
+    antonymsVi:['cải tạo tòa nhà hiện có','tân trang cơ sở vật chất','sử dụng hạ tầng hiện có'],
+    wordFamily:['construct (v)','construction (n)','facility (n)','scratch (n)'],
+    wordFamilyVi:['xây dựng (động từ)','công trình xây dựng (danh từ)','cơ sở vật chất (danh từ)','từ đầu (danh từ)'],
+    example:'"In underdeveloped areas, companies must construct facilities from scratch, which increases relocation costs."',
+    exampleVi:'"Ở các vùng kém phát triển, doanh nghiệp phải xây dựng cơ sở vật chất từ đầu, điều này tăng chi phí di dời."',
+    usage:'construct / build + N + from scratch'
+  },
+  {
+    id:14, en:'establish supply chains', ipa:'/ɪˈstæb.lɪʃ səˈplaɪ tʃeɪnz/', pos:'v phrase',
+    vi:'Thiết lập chuỗi cung ứng',
+    enDef:'To set up the network of suppliers, producers, and distributors needed to deliver goods or services',
+    collocations:['establish new supply chains','establish supply chains in rural regions','time to establish supply chains','establish local supply chains'],
+    collocationVi:['thiết lập chuỗi cung ứng mới','thiết lập chuỗi cung ứng ở nông thôn','thời gian thiết lập chuỗi cung ứng','thiết lập chuỗi cung ứng địa phương'],
+    synonyms:['set up supply networks','build distribution channels','create logistics systems'],
+    synonymsVi:['thiết lập mạng lưới cung cấp','xây dựng kênh phân phối','tạo hệ thống logistics'],
+    antonyms:['dismantle supply chains','break supply networks','disrupt logistics'],
+    antonymsVi:['giải thể chuỗi cung ứng','phá vỡ mạng cung cấp','phá vỡ logistics'],
+    wordFamily:['establish (v)','establishment (n)','supply (n/v)','chain (n)'],
+    wordFamilyVi:['thiết lập (động từ)','sự thiết lập (danh từ)','nguồn cung/cung cấp (danh từ/động từ)','chuỗi (danh từ)'],
+    example:'"Relocating a company requires time and investment to establish supply chains in the new location."',
+    exampleVi:'"Việc di dời công ty đòi hỏi thời gian và đầu tư để thiết lập chuỗi cung ứng tại địa điểm mới."',
+    usage:'establish + supply chains / networks / systems'
+  },
+  {
+    id:15, en:'offer higher salaries', ipa:'/ˈɒf.ər ˈhaɪ.ər ˈsæl.ər.iz/', pos:'v phrase',
+    vi:'Trả lương cao hơn',
+    enDef:'To provide workers with greater financial compensation to attract or retain them in a new location',
+    collocations:['offer higher salaries to attract talent','must offer higher salaries','offer competitive salaries','offer higher salaries to relocate staff'],
+    collocationVi:['trả lương cao hơn để thu hút nhân tài','phải trả lương cao hơn','trả lương cạnh tranh','trả lương cao hơn để di dời nhân viên'],
+    synonyms:['pay higher wages','provide better compensation','offer competitive pay','increase remuneration'],
+    synonymsVi:['trả lương cao hơn','cung cấp thù lao tốt hơn','trả lương cạnh tranh','tăng thù lao'],
+    antonyms:['cut salaries','reduce wages','offer lower pay','decrease compensation'],
+    antonymsVi:['cắt giảm lương','giảm lương','trả lương thấp hơn','giảm thù lao'],
+    wordFamily:['offer (v)','salary (n)','compensation (n)','wage (n)'],
+    wordFamilyVi:['đề nghị (động từ)','lương (danh từ)','thù lao (danh từ)','tiền công (danh từ)'],
+    example:'"Firms relocating to rural areas must offer higher salaries to convince skilled workers to move."',
+    exampleVi:'"Các công ty di dời đến vùng nông thôn phải trả lương cao hơn để thuyết phục người lao động có kỹ năng chuyển đến."',
+    usage:'offer + higher salaries / better benefits / incentives'
+  },
+  {
+    id:16, en:'relocate employees', ipa:'/ˌriː.ləʊˈkeɪt ɪmˈplɔɪ.iːz/', pos:'v phrase',
+    vi:'Di dời nhân viên',
+    enDef:'To transfer workers from one location to another as part of a business or organizational move',
+    collocations:['relocate employees to new offices','persuade employees to relocate','assistance to relocate employees','employees must relocate'],
+    collocationVi:['di dời nhân viên đến văn phòng mới','thuyết phục nhân viên di dời','hỗ trợ di dời nhân viên','nhân viên phải di dời'],
+    synonyms:['transfer staff','move workers','redeploy employees','reassign personnel'],
+    synonymsVi:['chuyển công tác nhân viên','di chuyển người lao động','tái phân công nhân viên','phân công lại nhân sự'],
+    antonyms:['retain employees','keep staff in place','maintain workforce location'],
+    antonymsVi:['giữ chân nhân viên','giữ nhân viên tại chỗ','duy trì vị trí lực lượng lao động'],
+    wordFamily:['relocate (v)','relocation (n)','employee (n)','transfer (v/n)'],
+    wordFamilyVi:['di dời (động từ)','sự di dời (danh từ)','nhân viên (danh từ)','chuyển giao (động từ/danh từ)'],
+    example:'"Asking workers to relocate employees away from their families is one major challenge of decentralization."',
+    exampleVi:'"Yêu cầu người lao động di dời xa gia đình là một trong những thách thức lớn của phân quyền."',
+    usage:'relocate + employees / staff / operations + to + place'
+  },
+  {
+    id:17, en:'initial savings', ipa:'/ɪˈnɪʃ.əl ˈseɪ.vɪŋz/', pos:'n phrase',
+    vi:'Tiết kiệm ban đầu',
+    enDef:'The money saved at the beginning of a process or project, which may not reflect long-term financial outcomes',
+    collocations:['initial savings seem attractive','initial savings are offset by','initial cost savings','initial savings in rent'],
+    collocationVi:['tiết kiệm ban đầu có vẻ hấp dẫn','tiết kiệm ban đầu bị bù đắp bởi','tiết kiệm chi phí ban đầu','tiết kiệm tiền thuê ban đầu'],
+    synonyms:['upfront savings','early cost reductions','short-term savings','preliminary savings'],
+    synonymsVi:['tiết kiệm trước mắt','giảm chi phí ban đầu','tiết kiệm ngắn hạn','tiết kiệm sơ bộ'],
+    antonyms:['long-term costs','eventual expenses','ongoing costs'],
+    antonymsVi:['chi phí dài hạn','chi phí cuối cùng','chi phí liên tục'],
+    wordFamily:['initial (adj)','initially (adv)','save (v)','savings (n)'],
+    wordFamilyVi:['ban đầu (tính từ)','lúc đầu (trạng từ)','tiết kiệm (động từ)','khoản tiết kiệm (danh từ)'],
+    example:'"The initial savings from moving to a cheaper location were quickly overshadowed by hidden costs."',
+    exampleVi:'"Khoản tiết kiệm ban đầu từ việc chuyển đến địa điểm rẻ hơn nhanh chóng bị lấn át bởi các chi phí ẩn."',
+    usage:'initial savings + may be / are overshadowed by'
+  },
+  {
+    id:18, en:'be overshadowed by', ipa:'/bi ˌəʊ.vəˈʃæd.əʊd baɪ/', pos:'v phrase',
+    vi:'Bị lấn át bởi',
+    enDef:'To be made less important or significant by something else, especially something negative',
+    collocations:['be overshadowed by hidden costs','be overshadowed by negative impacts','initial benefits are overshadowed by','savings are overshadowed by expenses'],
+    collocationVi:['bị lấn át bởi chi phí ẩn','bị lấn át bởi tác động tiêu cực','lợi ích ban đầu bị lấn át bởi','tiết kiệm bị lấn át bởi chi tiêu'],
+    synonyms:['be outweighed by','be eclipsed by','be negated by','be cancelled out by'],
+    synonymsVi:['bị vượt trội bởi','bị che khuất bởi','bị phủ nhận bởi','bị triệt tiêu bởi'],
+    antonyms:['outweigh','overshadow','surpass','exceed'],
+    antonymsVi:['vượt trội','che khuất','vượt qua','vượt hơn'],
+    wordFamily:['overshadow (v)','shadow (n)','overshadowing (adj)'],
+    wordFamilyVi:['che khuất/lấn át (động từ)','bóng tối (danh từ)','đang che khuất (tính từ)'],
+    example:'"The benefits of relocation were often be overshadowed by the unexpected difficulties workers faced."',
+    exampleVi:'"Những lợi ích của việc di dời thường bị lấn át bởi những khó khăn bất ngờ mà người lao động phải đối mặt."',
+    usage:'be overshadowed by + N'
+  },
+  {
+    id:19, en:'long daily commutes', ipa:'/lɒŋ ˈdeɪ.li kəˈmjuːts/', pos:'n phrase',
+    vi:'Đi làm xa mỗi ngày',
+    enDef:'The practice of travelling a great distance to and from work on a daily basis',
+    collocations:['endure long daily commutes','long daily commutes reduce productivity','avoid long commutes','long commutes exhaust workers'],
+    collocationVi:['chịu đựng việc đi làm xa hàng ngày','đi làm xa làm giảm năng suất','tránh đi lại xa','đi làm xa làm kiệt sức người lao động'],
+    synonyms:['lengthy journeys to work','extended daily travel','far commutes','time-consuming commutes'],
+    synonymsVi:['hành trình dài đến nơi làm việc','di chuyển hàng ngày kéo dài','đi làm xa','đi lại tốn thời gian'],
+    antonyms:['short commutes','nearby workplace','work-from-home','local employment'],
+    antonymsVi:['đi làm gần','nơi làm việc gần nhà','làm việc tại nhà','việc làm địa phương'],
+    wordFamily:['commute (v/n)','commuter (n)','daily (adj)','long-distance (adj)'],
+    wordFamilyVi:['đi lại/đường đi làm (động từ/danh từ)','người đi làm (danh từ)','hàng ngày (tính từ)','đường dài (tính từ)'],
+    example:'"Workers who refuse to relocate often face long daily commutes that affect their health and productivity."',
+    exampleVi:'"Người lao động từ chối di dời thường phải đối mặt với việc đi làm xa hàng ngày ảnh hưởng đến sức khỏe và năng suất."'
+  },
+  {
+    id:20, en:'job satisfaction', ipa:'/dʒɒb ˌsæt.ɪsˈfæk.ʃən/', pos:'n',
+    vi:'Sự hài lòng trong công việc',
+    enDef:'The feeling of fulfilment or contentment that a person derives from their work',
+    collocations:['job satisfaction decreases','improve job satisfaction','low job satisfaction','factors affecting job satisfaction'],
+    collocationVi:['sự hài lòng giảm','cải thiện sự hài lòng','sự hài lòng thấp','các yếu tố ảnh hưởng đến sự hài lòng'],
+    synonyms:['work fulfillment','employee contentment','work-life satisfaction','professional happiness'],
+    synonymsVi:['sự thỏa mãn trong công việc','sự hài lòng của nhân viên','sự hài lòng cuộc sống-công việc','hạnh phúc nghề nghiệp'],
+    antonyms:['job dissatisfaction','work frustration','professional discontent'],
+    antonymsVi:['sự không hài lòng trong công việc','sự thất vọng trong công việc','sự bất mãn nghề nghiệp'],
+    wordFamily:['satisfy (v)','satisfied (adj)','satisfaction (n)','satisfactory (adj)'],
+    wordFamilyVi:['thỏa mãn (động từ)','hài lòng (tính từ)','sự hài lòng (danh từ)','đạt yêu cầu (tính từ)'],
+    example:'"Forced relocation can lead to decreased job satisfaction as workers feel uprooted from their communities."',
+    exampleVi:'"Việc di dời cưỡng bức có thể dẫn đến giảm sự hài lòng trong công việc khi người lao động cảm thấy bị nhổ bật khỏi cộng đồng."'
+  },
+  {
+    id:21, en:'productivity', ipa:'/ˌprɒd.ʌkˈtɪv.ɪ.ti/', pos:'n',
+    vi:'Năng suất',
+    enDef:'The effectiveness of productive effort, especially in industry, measured in terms of output per unit of input',
+    collocations:['boost productivity','productivity decreases','maintain high productivity','productivity levels drop','worker productivity'],
+    collocationVi:['tăng năng suất','năng suất giảm','duy trì năng suất cao','mức năng suất giảm','năng suất người lao động'],
+    synonyms:['efficiency','output rate','work rate','performance level'],
+    synonymsVi:['hiệu quả','tỷ lệ đầu ra','tốc độ làm việc','mức hiệu suất'],
+    antonyms:['inefficiency','low output','unproductivity','idleness'],
+    antonymsVi:['kém hiệu quả','đầu ra thấp','không hiệu quả','sự lười biếng'],
+    wordFamily:['productive (adj)','produce (v)','production (n)','unproductive (adj)'],
+    wordFamilyVi:['hiệu quả (tính từ)','sản xuất (động từ)','sản xuất (danh từ)','kém hiệu quả (tính từ)'],
+    example:'"Long commutes and poor living conditions can severely impact workers\' productivity."',
+    exampleVi:'"Đi làm xa và điều kiện sống kém có thể ảnh hưởng nghiêm trọng đến năng suất của người lao động."'
+  },
+  {
+    id:22, en:'uproot their lives', ipa:'/ʌpˈruːt ðeər laɪvz/', pos:'v phrase',
+    vi:'Thay đổi toàn bộ cuộc sống',
+    enDef:'To force someone to leave their home or community and move to a completely unfamiliar place',
+    collocations:['uproot their lives completely','be forced to uproot their lives','uproot families','uproot themselves and move'],
+    collocationVi:['thay đổi hoàn toàn cuộc sống','bị buộc phải thay đổi cuộc sống','nhổ bật gốc rễ gia đình','tự mình thay đổi và chuyển đi'],
+    synonyms:['displace their lives','tear up their roots','force a major life change','disrupt their settled life'],
+    synonymsVi:['làm xáo trộn cuộc sống','cắt đứt gốc rễ','buộc thay đổi cuộc sống lớn','phá vỡ cuộc sống ổn định'],
+    antonyms:['stay put','remain rooted','keep their home','maintain stability'],
+    antonymsVi:['ở nguyên chỗ','duy trì gốc rễ','giữ nhà','duy trì ổn định'],
+    wordFamily:['uproot (v)','root (n)','uprooted (adj)','displacement (n)'],
+    wordFamilyVi:['nhổ bật gốc rễ (động từ)','gốc rễ (danh từ)','bị nhổ bật (tính từ)','sự di dời (danh từ)'],
+    example:'"Many workers resist relocation because they do not want to uproot their lives and leave their communities."',
+    exampleVi:'"Nhiều người lao động phản đối di dời vì họ không muốn thay đổi toàn bộ cuộc sống và rời bỏ cộng đồng của mình."',
+    usage:'uproot + lives / families / communities'
+  },
+  {
+    id:23, en:'lack of amenities', ipa:'/læk əv əˈmiː.nɪ.tɪz/', pos:'n phrase',
+    vi:'Thiếu tiện nghi',
+    enDef:'The absence of features that make a place comfortable and pleasant to live in, such as shops, parks, or entertainment',
+    collocations:['lack of amenities in rural areas','suffer from lack of amenities','lack of basic amenities','lack of amenities deters workers'],
+    collocationVi:['thiếu tiện nghi ở vùng nông thôn','chịu đựng sự thiếu tiện nghi','thiếu tiện nghi cơ bản','thiếu tiện nghi ngăn cản người lao động'],
+    synonyms:['absence of facilities','poor local services','limited conveniences','underdeveloped infrastructure'],
+    synonymsVi:['thiếu cơ sở vật chất','dịch vụ địa phương kém','tiện ích hạn chế','hạ tầng kém phát triển'],
+    antonyms:['abundance of amenities','well-equipped area','rich in facilities','full range of services'],
+    antonymsVi:['đầy đủ tiện nghi','khu vực được trang bị tốt','giàu cơ sở vật chất','đầy đủ dịch vụ'],
+    wordFamily:['amenity (n)','lack (v/n)'],
+    wordFamilyVi:['tiện nghi (danh từ)','thiếu/sự thiếu (động từ/danh từ)'],
+    example:'"A lack of amenities such as schools, hospitals, and entertainment options makes rural relocation unattractive."',
+    exampleVi:'"Sự thiếu tiện nghi như trường học, bệnh viện và các lựa chọn giải trí làm cho việc di dời về nông thôn kém hấp dẫn."',
+    usage:'lack of + amenities / resources / infrastructure'
+  },
+  {
+    id:24, en:'educational resources', ipa:'/ˌed.jʊˈkeɪ.ʃən.əl rɪˈzɔː.sɪz/', pos:'n phrase',
+    vi:'Tài nguyên giáo dục',
+    enDef:'The materials, tools, facilities, and funding available to support learning and teaching in schools',
+    collocations:['lack of educational resources','access to educational resources','educational resources in rural schools','improve educational resources'],
+    collocationVi:['thiếu tài nguyên giáo dục','tiếp cận tài nguyên giáo dục','tài nguyên giáo dục ở trường nông thôn','cải thiện tài nguyên giáo dục'],
+    synonyms:['learning materials','school facilities','teaching resources','academic support'],
+    synonymsVi:['tài liệu học tập','cơ sở vật chất trường học','tài nguyên giảng dạy','hỗ trợ học thuật'],
+    antonyms:['resource-rich schools','well-funded education','abundant learning materials'],
+    antonymsVi:['trường học giàu tài nguyên','giáo dục được tài trợ tốt','tài liệu học tập dồi dào'],
+    wordFamily:['educate (v)','education (n)','educational (adj)','resource (n)'],
+    wordFamilyVi:['giáo dục (động từ)','giáo dục (danh từ)','có tính giáo dục (tính từ)','tài nguyên (danh từ)'],
+    example:'"Workers with families are reluctant to relocate to areas with poor educational resources for their children."',
+    exampleVi:'"Người lao động có gia đình ngần ngại di dời đến các khu vực có tài nguyên giáo dục kém cho con cái họ."',
+    usage:'educational resources in / for + N',
+    topic:'decentralization'
+  },
+
+  // ===== PRACTICE 1: Having Children Later =====
+  {
+    id:25, en:'embark on parenthood', ipa:'/ɪmˈbɑːk ɒn ˈpeər.ənt.hʊd/', pos:'v phrase',
+    vi:'Bắt đầu hành trình làm cha mẹ',
+    enDef:'To begin the experience of becoming and being a parent, often implying a major life commitment',
+    collocations:['embark on parenthood later in life','choose to embark on parenthood','embark on parenthood responsibilities','delay embarking on parenthood'],
+    collocationVi:['bắt đầu làm cha mẹ khi đã lớn tuổi','chọn bắt đầu hành trình làm cha mẹ','gánh trách nhiệm làm cha mẹ','trì hoãn việc làm cha mẹ'],
+    synonyms:['start a family','take on parenthood','begin raising children','become a parent'],
+    synonymsVi:['lập gia đình','đảm nhận trách nhiệm cha mẹ','bắt đầu nuôi con','trở thành cha/mẹ'],
+    antonyms:['remain childless','forgo parenthood','avoid having children'],
+    antonymsVi:['không có con','từ chối làm cha mẹ','tránh sinh con'],
+    wordFamily:['embark (v)','parent (n/v)','parenthood (n)','parental (adj)'],
+    wordFamilyVi:['bắt đầu (động từ)','cha/mẹ (danh từ/động từ)','việc làm cha mẹ (danh từ)','thuộc về cha mẹ (tính từ)'],
+    example:'"Many modern women choose to embark on parenthood only after establishing a stable career."',
+    exampleVi:'"Nhiều phụ nữ hiện đại chọn bắt đầu hành trình làm mẹ sau khi đã xây dựng được sự nghiệp ổn định."',
+    usage:'embark on + parenthood / a journey / a career',
+    topic:'children_later'
+  },
+  {
+    id:26, en:'child-rearing costs', ipa:'/tʃaɪld ˈrɪər.ɪŋ kɒsts/', pos:'n phrase',
+    vi:'Chi phí nuôi dưỡng trẻ em',
+    enDef:'The financial expenses involved in raising a child, including education, healthcare, food, and housing',
+    collocations:['increasing child-rearing costs','rising child-rearing costs','child-rearing costs put pressure on couples','high child-rearing costs'],
+    collocationVi:['chi phí nuôi con ngày càng tăng','chi phí nuôi con leo thang','chi phí nuôi con tạo áp lực lên cặp đôi','chi phí nuôi con cao'],
+    synonyms:['cost of raising a child','parenting expenses','childcare costs','upbringing costs'],
+    synonymsVi:['chi phí nuôi con','chi tiêu nuôi con','chi phí trông trẻ','chi phí giáo dưỡng'],
+    antonyms:['affordable childcare','low parenting costs','subsidized child-rearing'],
+    antonymsVi:['chăm sóc trẻ em giá rẻ','chi phí nuôi con thấp','nuôi con được trợ cấp'],
+    wordFamily:['rear (v)','rearing (n)','child (n)','cost (n)'],
+    wordFamilyVi:['nuôi dưỡng (động từ)','sự nuôi dưỡng (danh từ)','trẻ em (danh từ)','chi phí (danh từ)'],
+    example:'"Increasing child-rearing costs put enormous pressures on young couples, causing many to delay having children."',
+    exampleVi:'"Chi phí nuôi con ngày càng tăng gây áp lực rất lớn lên các cặp đôi trẻ, khiến nhiều người trì hoãn sinh con."',
+    usage:'child-rearing costs + rise / put pressure on',
+    topic:'children_later'
+  },
+  {
+    id:27, en:'pursue higher education', ipa:'/pəˈsjuː ˈhaɪ.ər ˌed.jʊˈkeɪ.ʃən/', pos:'v phrase',
+    vi:'Theo đuổi giáo dục bậc cao',
+    enDef:'To seek advanced academic qualifications such as master\'s degrees or PhDs beyond standard schooling',
+    collocations:['pursue higher education before starting a family','pursue higher education abroad','pursue higher education opportunities','encourage women to pursue higher education'],
+    collocationVi:['theo đuổi học vấn cao trước khi lập gia đình','theo đuổi học vấn cao ở nước ngoài','theo đuổi cơ hội giáo dục bậc cao','khuyến khích phụ nữ học lên cao'],
+    synonyms:['seek advanced degrees','attain higher qualifications','continue academic studies','further one\'s education'],
+    synonymsVi:['tìm kiếm bằng cấp cao hơn','đạt được trình độ cao hơn','tiếp tục học thuật','nâng cao trình độ'],
+    antonyms:['drop out of education','forgo further study','enter workforce early'],
+    antonymsVi:['bỏ học','từ bỏ việc học thêm','đi làm sớm'],
+    wordFamily:['pursue (v)','pursuit (n)','education (n)','educational (adj)'],
+    wordFamilyVi:['theo đuổi (động từ)','sự theo đuổi (danh từ)','giáo dục (danh từ)','có tính giáo dục (tính từ)'],
+    example:'"Many individuals pursue higher education such as master\'s degrees and PhDs, which extends the period before they feel ready to bear a child."',
+    exampleVi:'"Nhiều người theo đuổi học vấn cao như thạc sĩ và tiến sĩ, điều này kéo dài giai đoạn trước khi họ cảm thấy sẵn sàng sinh con."',
+    usage:'pursue + higher education / a degree / a career',
+    topic:'children_later'
+  },
+  {
+    id:28, en:'fertility treatment', ipa:'/fɜːˈtɪl.ɪ.ti ˈtriːt.mənt/', pos:'n phrase',
+    vi:'Điều trị sinh sản',
+    enDef:'Medical procedures designed to help individuals or couples conceive a child, such as IVF',
+    collocations:['fertility treatments such as IVF','advances in fertility treatment','undergo fertility treatment','fertility treatment provides reassurance'],
+    collocationVi:['điều trị sinh sản như thụ tinh trong ống nghiệm','tiến bộ trong điều trị sinh sản','trải qua điều trị sinh sản','điều trị sinh sản mang lại sự an tâm'],
+    synonyms:['reproductive medicine','assisted reproduction','IVF treatment','conception therapy'],
+    synonymsVi:['y học sinh sản','hỗ trợ sinh sản','điều trị IVF','liệu pháp thụ thai'],
+    antonyms:['natural conception','unaided pregnancy','unassisted reproduction'],
+    antonymsVi:['thụ thai tự nhiên','mang thai không hỗ trợ','sinh sản không trợ giúp'],
+    wordFamily:['fertile (adj)','fertility (n)','treat (v)','treatment (n)'],
+    wordFamilyVi:['màu mỡ/có khả năng sinh sản (tính từ)','khả năng sinh sản (danh từ)','điều trị (động từ)','phương pháp điều trị (danh từ)'],
+    example:'"Fertility treatments like IVF provide reassurance that parenthood is possible even at an older age."',
+    exampleVi:'"Các phương pháp điều trị sinh sản như IVF mang lại sự an tâm rằng việc làm cha mẹ vẫn có thể thực hiện ngay cả khi đã lớn tuổi."',
+    usage:'fertility treatment / treatments like IVF',
+    topic:'children_later'
+  },
+  {
+    id:29, en:'generation gap', ipa:'/ˌdʒen.əˈreɪ.ʃən ɡæp/', pos:'n phrase',
+    vi:'Khoảng cách thế hệ',
+    enDef:'A significant difference in attitudes, values, or experiences between people of different age groups, especially parents and children',
+    collocations:['widen the generation gap','a growing generation gap','generation gap between parents and children','cause a generation gap'],
+    collocationVi:['nới rộng khoảng cách thế hệ','khoảng cách thế hệ ngày càng lớn','khoảng cách thế hệ giữa cha mẹ và con cái','gây ra khoảng cách thế hệ'],
+    synonyms:['age gap','generational divide','intergenerational divide','age difference'],
+    synonymsVi:['khoảng cách tuổi tác','sự phân chia thế hệ','khoảng cách giữa các thế hệ','sự chênh lệch tuổi'],
+    antonyms:['generational harmony','shared values across ages','intergenerational understanding'],
+    antonymsVi:['sự hài hòa thế hệ','giá trị chung qua các thế hệ','sự thấu hiểu liên thế hệ'],
+    wordFamily:['generation (n)','generational (adj)','gap (n)'],
+    wordFamilyVi:['thế hệ (danh từ)','thuộc về thế hệ (tính từ)','khoảng cách (danh từ)'],
+    example:'"Having children later in life leads to wider age gaps, making it harder for parents to relate to their children\'s interests and experiences, which may affect family bonds."',
+    exampleVi:'"Sinh con muộn tạo ra khoảng cách tuổi lớn hơn, khiến cha mẹ khó chia sẻ sở thích và trải nghiệm với con, điều này có thể ảnh hưởng đến mối quan hệ gia đình."',
+    usage:'generation gap + widens / affects + family bonds',
+    topic:'children_later'
+  },
+  {
+    id:30, en:'ageing population', ipa:'/ˈeɪ.dʒɪŋ ˌpɒp.jʊˈleɪ.ʃən/', pos:'n phrase',
+    vi:'Dân số già hóa',
+    enDef:'A demographic shift in which the proportion of older people in a society grows relative to younger generations',
+    collocations:['ageing population crisis','an ageing population leads to labour shortages','cope with an ageing population','ageing population and pension systems'],
+    collocationVi:['khủng hoảng dân số già','dân số già hóa dẫn đến thiếu hụt lao động','đối phó với dân số già','dân số già và hệ thống hưu trí'],
+    synonyms:['greying population','demographic ageing','elderly demographic','population greying'],
+    synonymsVi:['dân số bạc đầu','lão hóa dân số','nhân khẩu học người cao tuổi','dân số già đi'],
+    antonyms:['young population','growing workforce','demographic rejuvenation','population boom'],
+    antonymsVi:['dân số trẻ','lực lượng lao động tăng trưởng','sự trẻ hóa dân số','bùng nổ dân số'],
+    wordFamily:['age (v/n)','ageing (adj/n)','aged (adj)','elderly (adj)'],
+    wordFamilyVi:['già đi (động từ/danh từ)','già hóa (tính từ/danh từ)','cao tuổi (tính từ)','người cao tuổi (tính từ)'],
+    example:'"A trend toward having children later in life may potentially lead to an ageing population and labour shortages that reduce economic productivity."',
+    exampleVi:'"Xu hướng sinh con muộn có thể dẫn đến dân số già hóa và thiếu hụt lao động, làm giảm năng suất kinh tế."',
+    usage:'ageing population + leads to / causes + labour shortages',
+    topic:'children_later'
+  },
+
+  // ===== PRACTICE 2: Parental Pressure =====
+  {
+    id:31, en:'social mobility', ipa:'/ˈsəʊ.ʃəl məʊˈbɪl.ɪ.ti/', pos:'n phrase',
+    vi:'Sự dịch chuyển xã hội',
+    enDef:'The ability of individuals or families to move between different social and economic positions in society',
+    collocations:['upward social mobility','associate academic achievement with social mobility','social mobility through education','limited social mobility'],
+    collocationVi:['dịch chuyển xã hội đi lên','liên hệ thành tích học tập với dịch chuyển xã hội','dịch chuyển xã hội thông qua giáo dục','dịch chuyển xã hội hạn chế'],
+    synonyms:['upward mobility','class progression','socioeconomic advancement','social advancement'],
+    synonymsVi:['thăng tiến xã hội','tiến bộ giai cấp','thăng tiến kinh tế-xã hội','nâng cao địa vị xã hội'],
+    antonyms:['social stagnation','class immobility','social rigidity','downward mobility'],
+    antonymsVi:['trì trệ xã hội','bất động giai cấp','cứng nhắc xã hội','dịch chuyển xã hội đi xuống'],
+    wordFamily:['mobile (adj)','mobility (n)','mobilize (v)','social (adj)'],
+    wordFamilyVi:['linh hoạt (tính từ)','khả năng di chuyển (danh từ)','huy động (động từ)','xã hội (tính từ)'],
+    example:'"Parents who grew up in poverty often associate academic achievement with financial security and social mobility, pushing their children to excel."',
+    exampleVi:'"Những bậc cha mẹ lớn lên trong nghèo khó thường gắn liền thành tích học tập với an ninh tài chính và dịch chuyển xã hội, thúc đẩy con cái phấn đấu."',
+    usage:'social mobility + through education / upward social mobility',
+    topic:'parental_pressure'
+  },
+  {
+    id:32, en:'social comparison', ipa:'/ˈsəʊ.ʃəl kəmˈpær.ɪ.sən/', pos:'n phrase',
+    vi:'So sánh xã hội',
+    enDef:'The tendency to evaluate one\'s own achievements, status, or possessions in relation to those of others in society',
+    collocations:['social comparison via social media','a culture of social comparison','social comparison drives parental pressure','social comparison leads to competition'],
+    collocationVi:['so sánh xã hội qua mạng xã hội','văn hóa so sánh xã hội','so sánh xã hội thúc đẩy áp lực từ cha mẹ','so sánh xã hội dẫn đến cạnh tranh'],
+    synonyms:['peer comparison','competitive benchmarking','status comparison','keeping up with others'],
+    synonymsVi:['so sánh với bạn bè','chuẩn đối sánh cạnh tranh','so sánh địa vị','không thua kém người khác'],
+    antonyms:['self-acceptance','internal benchmarking','individualism','avoiding comparison'],
+    antonymsVi:['chấp nhận bản thân','đánh giá nội tâm','chủ nghĩa cá nhân','tránh so sánh'],
+    wordFamily:['compare (v)','comparison (n)','comparative (adj)','social (adj)'],
+    wordFamilyVi:['so sánh (động từ)','sự so sánh (danh từ)','có tính so sánh (tính từ)','xã hội (tính từ)'],
+    example:'"Social media exposes parents to other children\'s academic achievements, creating a culture of social comparison that drives them to pressure their own children."',
+    exampleVi:'"Mạng xã hội khiến cha mẹ tiếp xúc với thành tích học tập của con cái người khác, tạo ra văn hóa so sánh xã hội thúc đẩy họ gây áp lực lên con mình."',
+    usage:'social comparison + drives / leads to / creates pressure',
+    topic:'parental_pressure'
+  },
+  {
+    id:33, en:'suppress individuality', ipa:'/səˈpres ˌɪn.dɪ.vɪdʒ.uˈæl.ɪ.ti/', pos:'v phrase',
+    vi:'Triệt tiêu cá tính / bản sắc cá nhân',
+    enDef:'To prevent someone from expressing or developing their unique qualities, interests, and identity',
+    collocations:['suppress individuality through excessive pressure','suppress children\'s individuality','suppress individuality and creativity','pressure that suppresses individuality'],
+    collocationVi:['triệt tiêu cá tính qua áp lực quá mức','triệt tiêu cá tính của trẻ','triệt tiêu cá tính và sáng tạo','áp lực triệt tiêu cá tính'],
+    synonyms:['stifle self-expression','crush personal identity','inhibit individuality','curb self-discovery'],
+    synonymsVi:['kìm hãm tự thể hiện','dập tắt bản sắc cá nhân','ức chế cá tính','hạn chế khám phá bản thân'],
+    antonyms:['foster individuality','encourage self-expression','nurture personal identity','celebrate uniqueness'],
+    antonymsVi:['nuôi dưỡng cá tính','khuyến khích tự thể hiện','phát triển bản sắc cá nhân','tôn vinh sự độc đáo'],
+    wordFamily:['suppress (v)','suppression (n)','individual (n/adj)','individuality (n)'],
+    wordFamilyVi:['triệt tiêu (động từ)','sự triệt tiêu (danh từ)','cá nhân (danh từ/tính từ)','cá tính (danh từ)'],
+    example:'"Excessive parental pressure can suppress individuality, causing children to abandon their passions and follow paths chosen by their parents."',
+    exampleVi:'"Áp lực quá mức từ cha mẹ có thể triệt tiêu cá tính, khiến trẻ từ bỏ đam mê và đi theo con đường cha mẹ lựa chọn."',
+    usage:'suppress + individuality / creativity / self-expression',
+    topic:'parental_pressure'
+  },
+  {
+    id:34, en:'chronic stress', ipa:'/ˈkrɒn.ɪk stres/', pos:'n phrase',
+    vi:'Căng thẳng mãn tính',
+    enDef:'A prolonged and persistent state of psychological tension that can seriously harm mental and physical health',
+    collocations:['experience chronic stress','chronic stress and anxiety','chronic stress leads to depression','chronic stress from unrealistic expectations'],
+    collocationVi:['trải qua căng thẳng mãn tính','căng thẳng mãn tính và lo lắng','căng thẳng mãn tính dẫn đến trầm cảm','căng thẳng mãn tính từ kỳ vọng phi thực tế'],
+    synonyms:['persistent stress','ongoing anxiety','prolonged tension','long-term psychological pressure'],
+    synonymsVi:['căng thẳng dai dẳng','lo lắng liên tục','căng thẳng kéo dài','áp lực tâm lý lâu dài'],
+    antonyms:['mental well-being','psychological resilience','stress relief','emotional balance'],
+    antonymsVi:['sức khỏe tâm thần tốt','khả năng phục hồi tâm lý','giảm căng thẳng','cân bằng cảm xúc'],
+    wordFamily:['stress (n/v)','stressed (adj)','chronic (adj)','chronically (adv)'],
+    wordFamilyVi:['căng thẳng (danh từ/động từ)','bị căng thẳng (tính từ)','mãn tính (tính từ)','theo cách mãn tính (trạng từ)'],
+    example:'"Children who strive to meet unrealistic parental expectations often suffer from chronic stress, anxiety, or even depression."',
+    exampleVi:'"Trẻ em cố gắng đáp ứng kỳ vọng phi thực tế của cha mẹ thường bị căng thẳng mãn tính, lo lắng, thậm chí trầm cảm."',
+    usage:'suffer from / experience chronic stress',
+    topic:'parental_pressure'
+  },
+  {
+    id:35, en:'instil discipline and perseverance', ipa:'/ɪnˈstɪl ˈdɪs.ɪ.plɪn ænd ˌpɜː.sɪˈvɪər.əns/', pos:'v phrase',
+    vi:'Rèn luyện kỷ luật và sự kiên trì',
+    enDef:'To gradually develop habits of self-control and determination in a child through consistent guidance',
+    collocations:['instil discipline and perseverance in children','parental expectations instil discipline','instil strong work ethic','instil values in children'],
+    collocationVi:['rèn luyện kỷ luật và sự kiên trì cho trẻ','kỳ vọng của cha mẹ rèn luyện kỷ luật','rèn luyện đạo đức làm việc mạnh mẽ','truyền giá trị cho trẻ'],
+    synonyms:['build discipline','cultivate perseverance','foster determination','develop grit'],
+    synonymsVi:['xây dựng kỷ luật','nuôi dưỡng sự kiên trì','thúc đẩy quyết tâm','phát triển nghị lực'],
+    antonyms:['undermine discipline','discourage persistence','enable laziness','foster complacency'],
+    antonymsVi:['phá hoại kỷ luật','nản lòng sự kiên trì','nuông chiều sự lười biếng','nuôi dưỡng sự tự mãn'],
+    wordFamily:['instil (v)','discipline (n/v)','persevere (v)','perseverance (n)'],
+    wordFamilyVi:['truyền đạt/rèn luyện (động từ)','kỷ luật (danh từ/động từ)','kiên trì (động từ)','sự kiên trì (danh từ)'],
+    example:'"Parental expectations can encourage children to instil discipline and perseverance, preparing them for the demands of adult life."',
+    exampleVi:'"Kỳ vọng của cha mẹ có thể khuyến khích trẻ rèn luyện kỷ luật và sự kiên trì, chuẩn bị cho trẻ đối mặt với những đòi hỏi của cuộc sống trưởng thành."',
+    usage:'instil + discipline / perseverance / values + in children',
+    topic:'parental_pressure'
+  },
+  {
+    id:36, en:'relive unfulfilled dreams', ipa:'/ˌriːˈlɪv ˌʌn.fʊlˈfɪld driːmz/', pos:'v phrase',
+    vi:'Sống lại những giấc mơ dang dở',
+    enDef:'To attempt to achieve through one\'s children the goals and ambitions that one was unable to accomplish personally',
+    collocations:['relive unfulfilled dreams through their children','parents who relive their dreams','attempt to relive past ambitions','live vicariously through children'],
+    collocationVi:['sống lại giấc mơ dang dở qua con cái','cha mẹ sống lại ước mơ của mình','cố sống lại tham vọng cũ','sống ảo qua con cái'],
+    synonyms:['live vicariously through children','project ambitions onto children','fulfil dreams through offspring','impose past aspirations'],
+    synonymsVi:['sống gián tiếp qua con cái','chiếu tham vọng lên con cái','thực hiện ước mơ qua con cái','áp đặt khát vọng cũ'],
+    antonyms:['support children\'s own dreams','respect children\'s choices','encourage autonomy'],
+    antonymsVi:['ủng hộ ước mơ của con','tôn trọng lựa chọn của con','khuyến khích sự tự chủ'],
+    wordFamily:['relive (v)','unfulfilled (adj)','dream (n/v)','fulfil (v)'],
+    wordFamilyVi:['sống lại (động từ)','chưa được thực hiện (tính từ)','giấc mơ (danh từ/động từ)','thực hiện (động từ)'],
+    example:'"Some parents enrol their children in music classes because they carry regrets about goals they could not achieve, essentially trying to relive unfulfilled dreams through their children."',
+    exampleVi:'"Một số cha mẹ cho con học nhạc vì bản thân còn nuối tiếc những mục tiêu chưa đạt được, về bản chất là đang cố sống lại những giấc mơ dang dở qua con cái."',
+    usage:'relive + unfulfilled dreams / past ambitions + through children',
+    topic:'parental_pressure'
+  },
+
+  // ===== PRACTICE 3: Cars vs Bicycles =====
+  {
+    id:37, en:'upward social mobility', ipa:'/ˈʌp.wəd ˈsəʊ.ʃəl məʊˈbɪl.ɪ.ti/', pos:'n phrase',
+    vi:'Thăng tiến xã hội',
+    enDef:'The movement of individuals to a higher social or economic class, often marked by visible status symbols',
+    collocations:['a symbol of upward social mobility','car ownership signals upward social mobility','upward social mobility in developing countries','associate wealth with upward social mobility'],
+    collocationVi:['biểu tượng của sự thăng tiến xã hội','sở hữu xe hơi cho thấy sự thăng tiến','thăng tiến xã hội ở các nước đang phát triển','gắn của cải với sự thăng tiến xã hội'],
+    synonyms:['social advancement','class progression','socioeconomic rise','status improvement'],
+    synonymsVi:['tiến bộ xã hội','thăng cấp giai cấp','thăng tiến kinh tế-xã hội','cải thiện địa vị'],
+    antonyms:['social decline','downward mobility','economic stagnation','loss of status'],
+    antonymsVi:['suy giảm xã hội','dịch chuyển xã hội đi xuống','trì trệ kinh tế','mất địa vị'],
+    wordFamily:['mobile (adj)','mobility (n)','upward (adj)','social (adj)'],
+    wordFamilyVi:['linh hoạt (tính từ)','khả năng di chuyển (danh từ)','đi lên (tính từ)','xã hội (tính từ)'],
+    example:'"In many developing societies, purchasing a car is considered a major financial achievement and a symbol of upward social mobility rather than just a practical choice."',
+    exampleVi:'"Ở nhiều xã hội đang phát triển, mua xe hơi được coi là thành tựu tài chính lớn và biểu tượng của sự thăng tiến xã hội hơn là lựa chọn thực dụng."',
+    usage:'a symbol of upward social mobility',
+    topic:'cars_bicycles'
+  },
+  {
+    id:38, en:'urban-to-rural migration', ipa:'/ˈɜː.bən tuː ˈrʊər.əl maɪˈɡreɪ.ʃən/', pos:'n phrase',
+    vi:'Di cư từ thành thị ra nông thôn',
+    enDef:'The movement of people from cities to countryside areas, often in search of more affordable living or a quieter lifestyle',
+    collocations:['a growing tendency of urban-to-rural migration','urban-to-rural migration increases car dependency','urban-to-rural migration trend','urban-to-rural migration and transport needs'],
+    collocationVi:['xu hướng di cư từ thành thị ra nông thôn ngày càng tăng','di cư ra nông thôn tăng sự phụ thuộc vào xe hơi','xu hướng di cư ra nông thôn','di cư ra nông thôn và nhu cầu giao thông'],
+    synonyms:['counter-urbanisation','city-to-countryside movement','rural relocation','reverse migration'],
+    synonymsVi:['phản đô thị hóa','di chuyển từ thành phố về nông thôn','di dời về nông thôn','di cư ngược'],
+    antonyms:['urbanisation','rural-to-urban migration','city migration','urban influx'],
+    antonymsVi:['đô thị hóa','di cư từ nông thôn ra thành thị','di cư vào thành phố','dòng người đổ về thành thị'],
+    wordFamily:['migrate (v)','migration (n)','migrant (n)','urban (adj)','rural (adj)'],
+    wordFamilyVi:['di cư (động từ)','sự di cư (danh từ)','người di cư (danh từ)','đô thị (tính từ)','nông thôn (tính từ)'],
+    example:'"A growing tendency of urban-to-rural migration makes cars a necessity, as people need to travel long distances to reach workplaces and services."',
+    exampleVi:'"Xu hướng di cư từ thành thị ra nông thôn ngày càng tăng khiến xe hơi trở thành điều thiết yếu, vì người dân cần di chuyển xa để đến nơi làm việc và dịch vụ."',
+    usage:'urban-to-rural migration + increases / leads to + car dependency',
+    topic:'cars_bicycles'
+  },
+  {
+    id:39, en:'adverse weather conditions', ipa:'/ədˈvɜːs ˈweð.ər kənˈdɪʃ.ənz/', pos:'n phrase',
+    vi:'Điều kiện thời tiết bất lợi',
+    enDef:'Harsh or extreme weather such as heavy rain, intense heat, or cold that makes outdoor activities difficult or unpleasant',
+    collocations:['protection from adverse weather conditions','adverse weather conditions discourage cycling','adverse weather conditions favour car use','cope with adverse weather conditions'],
+    collocationVi:['bảo vệ khỏi điều kiện thời tiết bất lợi','thời tiết bất lợi nản lòng đạp xe','thời tiết bất lợi ủng hộ dùng xe hơi','đối phó với điều kiện thời tiết bất lợi'],
+    synonyms:['harsh weather','extreme weather','inclement weather','unfavourable climate'],
+    synonymsVi:['thời tiết khắc nghiệt','thời tiết cực đoan','thời tiết xấu','khí hậu không thuận lợi'],
+    antonyms:['mild weather','favourable conditions','pleasant climate','good weather'],
+    antonymsVi:['thời tiết ôn hòa','điều kiện thuận lợi','khí hậu dễ chịu','thời tiết tốt'],
+    wordFamily:['adverse (adj)','adversity (n)','weather (n)','condition (n)'],
+    wordFamilyVi:['bất lợi (tính từ)','nghịch cảnh (danh từ)','thời tiết (danh từ)','điều kiện (danh từ)'],
+    example:'"Cars offer greater comfort and protection from adverse weather conditions, so people upgrade from bicycles once they become financially capable."',
+    exampleVi:'"Xe hơi mang lại sự thoải mái hơn và bảo vệ khỏi điều kiện thời tiết bất lợi, vì vậy mọi người chuyển từ xe đạp sang xe hơi khi có đủ khả năng tài chính."',
+    usage:'protection from / cope with adverse weather conditions',
+    topic:'cars_bicycles'
+  },
+  {
+    id:40, en:'environmentally conscious', ipa:'/ɪnˌvaɪ.rənˈmen.tə.li ˈkɒn.ʃəs/', pos:'adj phrase',
+    vi:'Có ý thức bảo vệ môi trường',
+    enDef:'Being aware of and concerned about the impact of one\'s actions and choices on the natural environment',
+    collocations:['environmentally conscious citizens','become more environmentally conscious','environmentally conscious transport choices','environmentally conscious lifestyle'],
+    collocationVi:['công dân có ý thức bảo vệ môi trường','ngày càng có ý thức bảo vệ môi trường','lựa chọn phương tiện có ý thức môi trường','lối sống có ý thức bảo vệ môi trường'],
+    synonyms:['eco-aware','green-minded','environmentally aware','sustainability-conscious'],
+    synonymsVi:['có ý thức sinh thái','tư duy xanh','nhận thức môi trường','có ý thức bền vững'],
+    antonyms:['environmentally indifferent','pollution-tolerant','ecologically reckless','green-blind'],
+    antonymsVi:['thờ ơ với môi trường','chấp nhận ô nhiễm','liều lĩnh về sinh thái','không quan tâm đến môi trường'],
+    wordFamily:['environment (n)','environmental (adj)','conscious (adj)','consciousness (n)'],
+    wordFamilyVi:['môi trường (danh từ)','thuộc về môi trường (tính từ)','có ý thức (tính từ)','ý thức (danh từ)'],
+    example:'"Citizens in developed nations tend to be more environmentally conscious and aware of the health benefits that bicycles bring, driving the shift away from cars."',
+    exampleVi:'"Người dân ở các quốc gia phát triển thường có ý thức bảo vệ môi trường hơn và nhận thức được lợi ích sức khỏe mà xe đạp mang lại, thúc đẩy sự chuyển dịch khỏi xe hơi."',
+    usage:'environmentally conscious + citizens / choices / lifestyle',
+    topic:'cars_bicycles'
+  },
+  {
+    id:41, en:'social standing', ipa:'/ˈsəʊ.ʃəl ˈstæn.dɪŋ/', pos:'n phrase',
+    vi:'Địa vị xã hội',
+    enDef:'The rank, prestige, or position a person holds within their society or community',
+    collocations:['enhance social standing','confident about social standing','social standing through wealth','low social standing'],
+    collocationVi:['nâng cao địa vị xã hội','tự tin về địa vị xã hội','địa vị xã hội qua của cải','địa vị xã hội thấp'],
+    synonyms:['social status','social position','prestige','social rank'],
+    synonymsVi:['địa vị xã hội','vị trí xã hội','uy tín','thứ bậc xã hội'],
+    antonyms:['low status','social obscurity','lack of prestige','social marginalization'],
+    antonymsVi:['địa vị thấp','vô danh trong xã hội','thiếu uy tín','bị gạt ra bên lề xã hội'],
+    wordFamily:['stand (v)','standing (n/adj)','social (adj)','status (n)'],
+    wordFamilyVi:['đứng (động từ)','địa vị/thường xuyên (danh từ/tính từ)','xã hội (tính từ)','địa vị (danh từ)'],
+    example:'"As people enjoy economic prosperity and become more confident about their social standing, they care less about how others perceive their transport choices."',
+    exampleVi:'"Khi người dân được hưởng sự thịnh vượng kinh tế và tự tin hơn về địa vị xã hội, họ ít quan tâm hơn đến cách người khác nhìn nhận lựa chọn phương tiện đi lại của mình."',
+    usage:'confident about / enhance one\'s social standing',
+    topic:'cars_bicycles'
+  },
+
+  // ===== PRACTICE 1 ADDITIONAL VOCAB =====
+  {
+    id:42, en:'take on parenthood responsibilities', ipa:'/teɪk ɒn ˈpeər.ənt.hʊd rɪˌspɒn.sɪˈbɪl.ɪ.tɪz/', pos:'v phrase',
+    vi:'Gánh vác trách nhiệm làm cha mẹ',
+    enDef:'To accept and shoulder the duties and commitments involved in raising and caring for a child',
+    collocations:['take on parenthood responsibilities later','not yet ready to take on parenthood responsibilities','take on the responsibilities of raising a child','delay taking on parenthood responsibilities'],
+    collocationVi:['gánh vác trách nhiệm làm cha mẹ muộn hơn','chưa sẵn sàng gánh vác trách nhiệm','gánh vác trách nhiệm nuôi con','trì hoãn gánh vác trách nhiệm làm cha mẹ'],
+    synonyms:['assume parental duties','shoulder childcare responsibilities','embrace parenthood','take on the role of a parent'],
+    synonymsVi:['đảm nhận nghĩa vụ làm cha mẹ','gánh vác trách nhiệm trông trẻ','đón nhận việc làm cha mẹ','nhận vai trò cha mẹ'],
+    antonyms:['avoid parental duties','forgo parenthood','reject family responsibilities'],
+    antonymsVi:['tránh nghĩa vụ làm cha mẹ','từ chối làm cha mẹ','từ chối trách nhiệm gia đình'],
+    wordFamily:['take on (v phrase)','responsibility (n)','responsible (adj)','parent (n/v)'],
+    wordFamilyVi:['đảm nhận (cụm động từ)','trách nhiệm (danh từ)','có trách nhiệm (tính từ)','cha/mẹ (danh từ/động từ)'],
+    example:'"Many young adults today prefer to achieve personal goals and enjoy a certain lifestyle before taking on parenthood responsibilities."',
+    exampleVi:'"Nhiều người trẻ ngày nay thích đạt được mục tiêu cá nhân và tận hưởng lối sống nhất định trước khi gánh vác trách nhiệm làm cha mẹ."',
+    usage:'take on + parenthood responsibilities / parental duties',
+    topic:'children_later'
+  },
+  {
+    id:43, en:'be financially ready', ipa:'/biː faɪˈnæn.ʃəl.i ˈred.i/', pos:'adj phrase',
+    vi:'Sẵn sàng về tài chính',
+    enDef:'To have sufficient financial resources and stability before making a major life commitment such as having children',
+    collocations:['want to be financially ready','be financially ready to have children','be financially prepared for parenthood','ensure they are financially ready'],
+    collocationVi:['muốn sẵn sàng về tài chính','sẵn sàng tài chính để có con','sẵn sàng tài chính cho việc làm cha mẹ','đảm bảo sẵn sàng về mặt tài chính'],
+    synonyms:['be financially prepared','achieve financial stability','be economically secure','have sufficient savings'],
+    synonymsVi:['sẵn sàng về mặt tài chính','đạt được sự ổn định tài chính','an toàn về kinh tế','có đủ tiết kiệm'],
+    antonyms:['be financially unprepared','struggle financially','lack financial security'],
+    antonymsVi:['chưa chuẩn bị tài chính','khó khăn tài chính','thiếu an toàn tài chính'],
+    wordFamily:['finance (n)','financial (adj)','financially (adv)','ready (adj)'],
+    wordFamilyVi:['tài chính (danh từ)','thuộc về tài chính (tính từ)','về mặt tài chính (trạng từ)','sẵn sàng (tính từ)'],
+    example:'"Increasing child-rearing costs mean many couples want to be financially ready before having children to adequately provide for them."',
+    exampleVi:'"Chi phí nuôi con ngày càng tăng khiến nhiều cặp đôi muốn sẵn sàng về tài chính trước khi sinh con để có thể chăm lo đầy đủ cho chúng."',
+    usage:'be financially ready / prepared + to + V',
+    topic:'children_later'
+  },
+  {
+    id:44, en:'pursue professional development', ipa:'/pəˈsjuː prəˈfeʃ.ən.əl dɪˈvel.əp.mənt/', pos:'v phrase',
+    vi:'Theo đuổi sự phát triển nghề nghiệp',
+    enDef:'To actively work on building one\'s skills, qualifications, and career advancement before other life milestones',
+    collocations:['pursue professional development before starting a family','emphasize professional development','pursue career development opportunities','invest in professional development'],
+    collocationVi:['theo đuổi phát triển nghề nghiệp trước khi lập gia đình','nhấn mạnh vào phát triển nghề nghiệp','theo đuổi cơ hội phát triển sự nghiệp','đầu tư vào phát triển nghề nghiệp'],
+    synonyms:['focus on career advancement','prioritize career growth','build professional skills','develop one\'s career'],
+    synonymsVi:['tập trung vào thăng tiến nghề nghiệp','ưu tiên phát triển sự nghiệp','xây dựng kỹ năng nghề nghiệp','phát triển sự nghiệp'],
+    antonyms:['neglect career development','sacrifice career for family','deprioritize professional growth'],
+    antonymsVi:['bỏ qua phát triển nghề nghiệp','hi sinh sự nghiệp vì gia đình','không ưu tiên phát triển nghề nghiệp'],
+    wordFamily:['pursue (v)','professional (adj)','develop (v)','development (n)'],
+    wordFamilyVi:['theo đuổi (động từ)','chuyên nghiệp (tính từ)','phát triển (động từ)','sự phát triển (danh từ)'],
+    example:'"Many individuals today emphasize professional development before starting a family, as establishing a stable career in a competitive job market requires significant time and dedication."',
+    exampleVi:'"Nhiều người ngày nay nhấn mạnh vào phát triển nghề nghiệp trước khi lập gia đình, vì xây dựng sự nghiệp ổn định trong thị trường việc làm cạnh tranh đòi hỏi nhiều thời gian và tâm huyết."',
+    usage:'pursue / emphasize + professional development / career growth',
+    topic:'children_later'
+  },
+  {
+    id:45, en:'bear a child', ipa:'/beər ə tʃaɪld/', pos:'v phrase',
+    vi:'Sinh con',
+    enDef:'To give birth to a child; often used in formal or written contexts to describe the act of having a baby',
+    collocations:['feel ready to bear a child','delay bearing a child','choose when to bear a child','the decision to bear a child'],
+    collocationVi:['cảm thấy sẵn sàng sinh con','trì hoãn sinh con','chọn thời điểm sinh con','quyết định sinh con'],
+    synonyms:['have a child','give birth','conceive','start a family'],
+    synonymsVi:['có con','sinh đẻ','thụ thai','lập gia đình'],
+    antonyms:['remain childless','choose not to have children','forgo having children'],
+    antonymsVi:['không có con','chọn không có con','từ bỏ việc có con'],
+    wordFamily:['bear (v)','birth (n)','child (n)','childbearing (n)'],
+    wordFamilyVi:['sinh (động từ)','sự sinh nở (danh từ)','đứa trẻ (danh từ)','việc sinh đẻ (danh từ)'],
+    example:'"Pursuing higher education such as master\'s degrees extends the period before individuals feel ready to bear a child."',
+    exampleVi:'"Theo đuổi học vấn cao như bằng thạc sĩ kéo dài giai đoạn trước khi các cá nhân cảm thấy sẵn sàng sinh con."',
+    usage:'feel ready to / delay + bearing a child',
+    topic:'children_later'
+  },
+  {
+    id:46, en:'traditional norms', ipa:'/trəˈdɪʃ.ən.əl nɔːmz/', pos:'n phrase',
+    vi:'Chuẩn mực truyền thống',
+    enDef:'Long-established social expectations and conventions that dictate how people should behave in a given culture',
+    collocations:['traditional norms dictate women\'s roles','break away from traditional norms','challenge traditional norms','conform to traditional norms'],
+    collocationVi:['chuẩn mực truyền thống quy định vai trò phụ nữ','phá vỡ chuẩn mực truyền thống','thách thức chuẩn mực truyền thống','tuân theo chuẩn mực truyền thống'],
+    synonyms:['social conventions','cultural expectations','established customs','societal norms'],
+    synonymsVi:['quy ước xã hội','kỳ vọng văn hóa','phong tục đã được thiết lập','chuẩn mực xã hội'],
+    antonyms:['progressive values','modern attitudes','non-conformity','breaking conventions'],
+    antonymsVi:['giá trị tiến bộ','thái độ hiện đại','sự không tuân thủ','phá vỡ quy ước'],
+    wordFamily:['tradition (n)','traditional (adj)','traditionally (adv)','norm (n)'],
+    wordFamilyVi:['truyền thống (danh từ)','mang tính truyền thống (tính từ)','theo truyền thống (trạng từ)','chuẩn mực (danh từ)'],
+    example:'"In the past, traditional norms dictated that a woman\'s role was to raise children and manage households, but today improved gender equality has changed these expectations."',
+    exampleVi:'"Trong quá khứ, chuẩn mực truyền thống quy định rằng vai trò của phụ nữ là nuôi con và quản lý gia đình, nhưng ngày nay bình đẳng giới được cải thiện đã thay đổi những kỳ vọng này."',
+    usage:'traditional norms + dictate / shape + role of women',
+    topic:'children_later'
+  },
+  {
+    id:47, en:'mature parenting skills', ipa:'/məˈtʃʊər ˈpeər.ən.tɪŋ skɪlz/', pos:'n phrase',
+    vi:'Kỹ năng làm cha mẹ trưởng thành',
+    enDef:'The emotional, practical, and social abilities developed through life experience that help a person raise children effectively',
+    collocations:['develop mature parenting skills','better parenting skills','equipped with parenting skills','parenting skills improve with age'],
+    collocationVi:['phát triển kỹ năng làm cha mẹ trưởng thành','kỹ năng làm cha mẹ tốt hơn','được trang bị kỹ năng làm cha mẹ','kỹ năng làm cha mẹ cải thiện theo tuổi'],
+    synonyms:['experienced parenting','skilled child-rearing','effective parenting','capable parenthood'],
+    synonymsVi:['nuôi dạy con có kinh nghiệm','nuôi con có kỹ năng','làm cha mẹ hiệu quả','làm cha mẹ có năng lực'],
+    antonyms:['inexperienced parenting','immature child-rearing','poor parenting skills'],
+    antonymsVi:['nuôi con thiếu kinh nghiệm','nuôi con thiếu chín chắn','kỹ năng làm cha mẹ kém'],
+    wordFamily:['mature (adj/v)','maturity (n)','parent (n/v)','skill (n)'],
+    wordFamilyVi:['trưởng thành (tính từ/động từ)','sự trưởng thành (danh từ)','cha/mẹ (danh từ/động từ)','kỹ năng (danh từ)'],
+    example:'"Older parents are likely to have better, more mature parenting skills and are better equipped to handle the challenges of raising a child."',
+    exampleVi:'"Cha mẹ lớn tuổi hơn thường có kỹ năng làm cha mẹ tốt hơn, trưởng thành hơn và được trang bị tốt hơn để đối phó với những thách thức trong việc nuôi con."',
+    usage:'equipped with / develop + mature parenting skills',
+    topic:'children_later'
+  },
+  {
+    id:48, en:'labour shortage', ipa:'/ˈleɪ.bər ˈʃɔː.tɪdʒ/', pos:'n phrase',
+    vi:'Thiếu hụt lao động',
+    enDef:'A situation in which there are not enough workers available to meet the demands of employers in an economy',
+    collocations:['lead to labour shortages','severe labour shortages','labour shortages and economic decline','labour shortages in key sectors'],
+    collocationVi:['dẫn đến thiếu hụt lao động','thiếu hụt lao động nghiêm trọng','thiếu hụt lao động và suy giảm kinh tế','thiếu hụt lao động trong các lĩnh vực chủ chốt'],
+    synonyms:['workforce deficit','manpower shortage','skills gap','worker shortage'],
+    synonymsVi:['thiếu hụt lực lượng lao động','thiếu nhân lực','khoảng trống kỹ năng','thiếu người lao động'],
+    antonyms:['labour surplus','workforce abundance','full employment','ample workforce'],
+    antonymsVi:['dư thừa lao động','lực lượng lao động dồi dào','toàn dụng lao động','lực lượng lao động đầy đủ'],
+    wordFamily:['labour (n)','labourer (n)','shortage (n)','short (adj)'],
+    wordFamilyVi:['lao động (danh từ)','người lao động (danh từ)','sự thiếu hụt (danh từ)','thiếu (tính từ)'],
+    example:'"An ageing population resulting from delayed childbirth may potentially lead to severe labour shortages and decreased economic productivity."',
+    exampleVi:'"Dân số già hóa do sinh con muộn có thể dẫn đến thiếu hụt lao động nghiêm trọng và giảm năng suất kinh tế."',
+    usage:'lead to / cause + labour shortages',
+    topic:'children_later'
+  },
+  {
+    id:49, en:'well-equipped for the future', ipa:'/ˌwel ɪˈkwɪpt fə ðə ˈfjuː.tʃər/', pos:'adj phrase',
+    vi:'Được trang bị tốt cho tương lai',
+    enDef:'Having the necessary knowledge, skills, health, and resources to succeed and contribute effectively in adult life',
+    collocations:['well-equipped in terms of knowledge and health','well-equipped for the demands of adult life','a generation well-equipped to contribute','raise well-equipped children'],
+    collocationVi:['được trang bị tốt về kiến thức và sức khỏe','được trang bị tốt cho đòi hỏi của cuộc sống trưởng thành','một thế hệ được trang bị tốt để cống hiến','nuôi dạy con được trang bị tốt'],
+    synonyms:['fully prepared','comprehensively developed','ready for adult life','well-rounded and capable'],
+    synonymsVi:['được chuẩn bị đầy đủ','phát triển toàn diện','sẵn sàng cho cuộc sống người lớn','toàn diện và có năng lực'],
+    antonyms:['ill-equipped','underprepared','lacking in skills','poorly developed'],
+    antonymsVi:['thiếu trang bị','chưa được chuẩn bị','thiếu kỹ năng','phát triển kém'],
+    wordFamily:['equip (v)','equipment (n)','equipped (adj)','future (n/adj)'],
+    wordFamilyVi:['trang bị (động từ)','thiết bị (danh từ)','được trang bị (tính từ)','tương lai (danh từ/tính từ)'],
+    example:'"Financially secure older parents can provide better education and healthcare, producing a new generation well-equipped in terms of knowledge and health to contribute to long-run economic growth."',
+    exampleVi:'"Cha mẹ lớn tuổi có tài chính ổn định có thể cung cấp giáo dục và chăm sóc sức khỏe tốt hơn, tạo ra một thế hệ mới được trang bị tốt về kiến thức và sức khỏe để đóng góp cho tăng trưởng kinh tế dài hạn."',
+    usage:'a generation + well-equipped + to contribute to',
+    topic:'children_later'
+  },
+
+  // ===== PRACTICE 2 ADDITIONAL VOCAB =====
+  {
+    id:50, en:'endure hardship', ipa:'/ɪnˈdjʊər ˈhɑːd.ʃɪp/', pos:'v phrase',
+    vi:'Chịu đựng gian khổ / nghịch cảnh',
+    enDef:'To suffer through difficult or painful life circumstances, often poverty, hardship, or limited opportunities',
+    collocations:['endure hardship in childhood','parents who endured hardship','endure financial hardship','determined not to let children endure hardship'],
+    collocationVi:['chịu đựng gian khổ thời thơ ấu','những bậc cha mẹ đã chịu đựng gian khổ','chịu đựng khó khăn tài chính','quyết tâm không để con chịu đựng gian khổ'],
+    synonyms:['suffer hardship','face adversity','go through difficult times','overcome struggles'],
+    synonymsVi:['chịu đựng khó khăn','đối mặt với nghịch cảnh','trải qua thời gian khó khăn','vượt qua gian khổ'],
+    antonyms:['enjoy privilege','live comfortably','have an easy life'],
+    antonymsVi:['hưởng đặc quyền','sống thoải mái','có cuộc sống dễ dàng'],
+    wordFamily:['endure (v)','endurance (n)','hardship (n)','hard (adj)'],
+    wordFamilyVi:['chịu đựng (động từ)','sức chịu đựng (danh từ)','gian khổ (danh từ)','khó khăn (tính từ)'],
+    example:'"Many parents who endured hardship in their youth are determined that their children should not face the same struggles, and so push them to excel academically."',
+    exampleVi:'"Nhiều bậc cha mẹ đã chịu đựng gian khổ thời trẻ quyết tâm rằng con cái họ sẽ không phải đối mặt với những khó khăn tương tự, và vì vậy thúc đẩy con học tập xuất sắc."',
+    usage:'endure + hardship / adversity / struggle',
+    topic:'parental_pressure'
+  },
+  {
+    id:51, en:'competitive edge', ipa:'/kəmˈpet.ɪ.tɪv edʒ/', pos:'n phrase',
+    vi:'Lợi thế cạnh tranh',
+    enDef:'An advantage that enables someone to outperform others in competitive situations such as university admissions or the job market',
+    collocations:['give children a competitive edge','gain a competitive edge','competitive edge in university admissions','develop a competitive edge'],
+    collocationVi:['mang lại lợi thế cạnh tranh cho con','đạt được lợi thế cạnh tranh','lợi thế cạnh tranh trong tuyển sinh đại học','phát triển lợi thế cạnh tranh'],
+    synonyms:['advantage over peers','upper hand','competitive advantage','edge over competitors'],
+    synonymsVi:['lợi thế so với bạn bè','lợi thế','ưu thế cạnh tranh','lợi thế hơn đối thủ'],
+    antonyms:['competitive disadvantage','fall behind peers','lack of advantage','level playing field'],
+    antonymsVi:['bất lợi cạnh tranh','tụt hậu so với bạn bè','thiếu lợi thế','sân chơi bình đẳng'],
+    wordFamily:['compete (v)','competitive (adj)','competition (n)','edge (n)'],
+    wordFamilyVi:['cạnh tranh (động từ)','có tính cạnh tranh (tính từ)','sự cạnh tranh (danh từ)','lợi thế (danh từ)'],
+    example:'"As university admissions become more selective and high-paying jobs demand exceptional qualifications, parents push children to excel to give them a competitive edge."',
+    exampleVi:'"Khi tuyển sinh đại học ngày càng khắt khe hơn và các công việc thu nhập cao đòi hỏi bằng cấp xuất sắc, cha mẹ thúc đẩy con cái vươn lên để có lợi thế cạnh tranh."',
+    usage:'give / gain a competitive edge + in + N',
+    topic:'parental_pressure'
+  },
+  {
+    id:52, en:'rob children of their childhood', ipa:'/rɒb ˈtʃɪl.drən əv ðeər ˈtʃaɪld.hʊd/', pos:'v phrase',
+    vi:'Cướp đi tuổi thơ của trẻ',
+    enDef:'To deprive children of the carefree play, social interactions, and experiences that define a healthy childhood',
+    collocations:['pressure can rob children of their childhood','rob children of precious childhood years','rob children of play and relaxation','be robbed of a normal childhood'],
+    collocationVi:['áp lực có thể cướp đi tuổi thơ của trẻ','cướp đi những năm tháng tuổi thơ quý giá','cướp đi niềm vui chơi đùa và thư giãn','bị cướp đi một tuổi thơ bình thường'],
+    synonyms:['deprive children of their youth','steal away childhood','deny children their formative years'],
+    synonymsVi:['tước đi tuổi trẻ của trẻ','đánh cắp tuổi thơ','từ chối cho trẻ những năm hình thành nhân cách'],
+    antonyms:['protect childhood','preserve the innocence of youth','allow children to be children'],
+    antonymsVi:['bảo vệ tuổi thơ','gìn giữ sự hồn nhiên của tuổi trẻ','để trẻ được là trẻ em'],
+    wordFamily:['rob (v)','robbery (n)','childhood (n)','child (n)'],
+    wordFamilyVi:['cướp (động từ)','sự cướp bóc (danh từ)','tuổi thơ (danh từ)','đứa trẻ (danh từ)'],
+    example:'"Excessive parental pressure can rob children of their childhood, leaving them little time to play, relax, or form meaningful social relationships."',
+    exampleVi:'"Áp lực quá mức từ cha mẹ có thể cướp đi tuổi thơ của trẻ, khiến chúng có ít thời gian để chơi đùa, thư giãn hoặc xây dựng các mối quan hệ xã hội có ý nghĩa."',
+    usage:'rob children of + their childhood / youth / innocence',
+    topic:'parental_pressure'
+  },
+  {
+    id:53, en:'hinder social and emotional development', ipa:'/ˈhɪn.dər ˈsəʊ.ʃəl ænd ɪˈməʊ.ʃən.əl dɪˈvel.əp.mənt/', pos:'v phrase',
+    vi:'Cản trở sự phát triển xã hội và cảm xúc',
+    enDef:'To obstruct a child\'s ability to develop healthy relationships, emotional regulation, and social skills',
+    collocations:['hinder social and emotional development','hinder a child\'s emotional growth','hinder the development of social skills','hinder healthy relationship formation'],
+    collocationVi:['cản trở sự phát triển xã hội và cảm xúc','cản trở sự phát triển cảm xúc của trẻ','cản trở phát triển kỹ năng xã hội','cản trở việc hình thành các mối quan hệ lành mạnh'],
+    synonyms:['impede emotional growth','obstruct social development','stunt emotional maturity','hamper interpersonal skills'],
+    synonymsVi:['cản trở tăng trưởng cảm xúc','cản trở phát triển xã hội','kìm hãm sự trưởng thành cảm xúc','làm suy yếu kỹ năng giao tiếp'],
+    antonyms:['foster social development','promote emotional growth','nurture interpersonal skills'],
+    antonymsVi:['thúc đẩy phát triển xã hội','khuyến khích tăng trưởng cảm xúc','nuôi dưỡng kỹ năng giao tiếp'],
+    wordFamily:['hinder (v)','hindrance (n)','develop (v)','development (n)'],
+    wordFamilyVi:['cản trở (động từ)','sự cản trở (danh từ)','phát triển (động từ)','sự phát triển (danh từ)'],
+    example:'"A lack of play time and social interaction can hinder social and emotional development, causing difficulties in forming healthy relationships later in life."',
+    exampleVi:'"Thiếu thời gian vui chơi và giao lưu xã hội có thể cản trở sự phát triển xã hội và cảm xúc, gây ra khó khăn trong việc xây dựng các mối quan hệ lành mạnh sau này."',
+    usage:'hinder + social/emotional development / healthy relationship formation',
+    topic:'parental_pressure'
+  },
+  {
+    id:54, en:'lead to resentment or rebellion', ipa:'/liːd tuː rɪˈzent.mənt ɔːr rɪˈbel.jən/', pos:'v phrase',
+    vi:'Dẫn đến sự oán giận hoặc nổi loạn',
+    enDef:'To cause a child to develop feelings of bitterness or actively push back against authority, particularly parental control, in adolescence or adulthood',
+    collocations:['lead to resentment or rebellion in adulthood','damaged parent-child relationship lead to resentment','parental pressure lead to rebellion','cause long-term resentment'],
+    collocationVi:['dẫn đến oán giận hoặc nổi loạn ở tuổi trưởng thành','mối quan hệ cha mẹ-con cái tổn thương dẫn đến oán giận','áp lực từ cha mẹ dẫn đến nổi loạn','gây ra oán giận lâu dài'],
+    synonyms:['breed resentment','spark rebellion','cause defiance','trigger revolt against parents'],
+    synonymsVi:['nuôi dưỡng sự oán giận','kích động nổi loạn','gây ra sự phản kháng','kích hoạt sự chống lại cha mẹ'],
+    antonyms:['foster mutual respect','build a healthy bond','strengthen the parent-child relationship'],
+    antonymsVi:['nuôi dưỡng sự tôn trọng lẫn nhau','xây dựng mối quan hệ lành mạnh','củng cố mối quan hệ cha mẹ-con cái'],
+    wordFamily:['resent (v)','resentment (n)','rebel (v)','rebellion (n)'],
+    wordFamilyVi:['oán giận (động từ)','sự oán giận (danh từ)','nổi loạn (động từ)','sự nổi loạn (danh từ)'],
+    example:'"When parents impose academic and career expectations, they may damage the parent-child relationship, leading to deep resentment or outright rebellion in adulthood."',
+    exampleVi:'"Khi cha mẹ áp đặt kỳ vọng học tập và sự nghiệp, họ có thể làm tổn hại mối quan hệ cha mẹ-con cái, dẫn đến sự oán giận sâu sắc hoặc nổi loạn thẳng thắn ở tuổi trưởng thành."',
+    usage:'lead to + resentment / rebellion + in adulthood',
+    topic:'parental_pressure'
+  },
+  {
+    id:55, en:'strive for excellence', ipa:'/straɪv fɔːr ˈek.sə.ləns/', pos:'v phrase',
+    vi:'Phấn đấu vì sự xuất sắc',
+    enDef:'To make great and sustained effort to reach the highest possible standard of performance or achievement',
+    collocations:['motivate children to strive for excellence','strive for academic excellence','strive for excellence in all areas','encourage children to strive for excellence'],
+    collocationVi:['thúc đẩy trẻ phấn đấu vì sự xuất sắc','phấn đấu vì sự xuất sắc học thuật','phấn đấu vì sự xuất sắc trong mọi lĩnh vực','khuyến khích trẻ phấn đấu vì sự xuất sắc'],
+    synonyms:['aim for the highest standard','pursue excellence','chase perfection','aspire to greatness'],
+    synonymsVi:['hướng tới tiêu chuẩn cao nhất','theo đuổi sự xuất sắc','đuổi theo sự hoàn hảo','khát vọng vĩ đại'],
+    antonyms:['settle for mediocrity','underperform','aim low','lack ambition'],
+    antonymsVi:['chấp nhận sự tầm thường','hoạt động kém','đặt mục tiêu thấp','thiếu tham vọng'],
+    wordFamily:['strive (v)','striving (n)','excellent (adj)','excellence (n)'],
+    wordFamilyVi:['phấn đấu (động từ)','sự phấn đấu (danh từ)','xuất sắc (tính từ)','sự xuất sắc (danh từ)'],
+    example:'"By setting high standards, parents can motivate children who lack confidence to strive for excellence and broaden their opportunities."',
+    exampleVi:'"Bằng cách đặt ra tiêu chuẩn cao, cha mẹ có thể thúc đẩy những đứa trẻ thiếu tự tin phấn đấu vì sự xuất sắc và mở rộng cơ hội cho chúng."',
+    usage:'motivate / encourage + children + to strive for excellence',
+    topic:'parental_pressure'
+  },
+  {
+    id:56, en:'foster long-term achievement', ipa:'/ˈfɒs.tər lɒŋ tɜːm əˈtʃiːv.mənt/', pos:'v phrase',
+    vi:'Nuôi dưỡng thành tựu dài hạn',
+    enDef:'To support and encourage the development of lasting accomplishments and success over time, rather than short-term wins',
+    collocations:['foster long-term achievement','broaden opportunities and foster achievement','foster academic and professional achievement','parental guidance fosters long-term achievement'],
+    collocationVi:['nuôi dưỡng thành tựu dài hạn','mở rộng cơ hội và nuôi dưỡng thành tựu','nuôi dưỡng thành tựu học thuật và nghề nghiệp','hướng dẫn của cha mẹ nuôi dưỡng thành tựu dài hạn'],
+    synonyms:['cultivate lasting success','build lasting accomplishments','develop sustained achievement','promote durable excellence'],
+    synonymsVi:['vun đắp thành công bền vững','xây dựng thành tựu lâu dài','phát triển thành tích bền vững','thúc đẩy sự xuất sắc lâu dài'],
+    antonyms:['undermine long-term success','stifle achievement','hinder future progress'],
+    antonymsVi:['phá hoại thành công lâu dài','kìm hãm thành tích','cản trở tiến bộ trong tương lai'],
+    wordFamily:['foster (v)','achieve (v)','achievement (n)','long-term (adj)'],
+    wordFamilyVi:['nuôi dưỡng (động từ)','đạt được (động từ)','thành tựu (danh từ)','dài hạn (tính từ)'],
+    example:'"High parental expectations, when balanced appropriately, can broaden opportunities and foster long-term achievement for children."',
+    exampleVi:'"Kỳ vọng cao của cha mẹ, khi được cân bằng phù hợp, có thể mở rộng cơ hội và nuôi dưỡng thành tựu dài hạn cho trẻ."',
+    usage:'broaden opportunities and foster + long-term achievement',
+    topic:'parental_pressure'
+  },
+
+  // ===== PRACTICE 3 ADDITIONAL VOCAB =====
+  {
+    id:57, en:'reduce carbon emissions', ipa:'/rɪˈdjuːs ˈkɑː.bən ɪˈmɪʃ.ənz/', pos:'v phrase',
+    vi:'Giảm khí thải carbon',
+    enDef:'To lower the amount of carbon dioxide and other greenhouse gases released into the atmosphere, especially from vehicles',
+    collocations:['reduce carbon emissions significantly','cycling helps reduce carbon emissions','reduce carbon emissions from transport','reduce carbon emissions and fight climate change'],
+    collocationVi:['giảm đáng kể khí thải carbon','đạp xe giúp giảm khí thải carbon','giảm khí thải carbon từ giao thông','giảm khí thải carbon và chống biến đổi khí hậu'],
+    synonyms:['cut greenhouse gas emissions','lower carbon output','decrease CO2 emissions','reduce air pollution from transport'],
+    synonymsVi:['cắt giảm khí thải nhà kính','giảm lượng carbon thải ra','giảm lượng khí CO2','giảm ô nhiễm không khí từ giao thông'],
+    antonyms:['increase carbon emissions','worsen air pollution','raise CO2 output','contribute to greenhouse gases'],
+    antonymsVi:['tăng khí thải carbon','làm trầm trọng ô nhiễm không khí','tăng lượng CO2 thải ra','góp phần vào khí nhà kính'],
+    wordFamily:['reduce (v)','reduction (n)','carbon (n)','emission (n)'],
+    wordFamilyVi:['giảm (động từ)','sự giảm (danh từ)','carbon (danh từ)','khí thải (danh từ)'],
+    example:'"Switching from cars to bicycles can significantly reduce carbon emissions, making cities cleaner and helping to combat climate change."',
+    exampleVi:'"Chuyển từ xe hơi sang xe đạp có thể giảm đáng kể khí thải carbon, làm cho các thành phố sạch hơn và giúp chống biến đổi khí hậu."',
+    usage:'reduce / cut + carbon emissions + from transport',
+    topic:'cars_bicycles'
+  },
+  {
+    id:58, en:'combat climate change', ipa:'/ˈkɒm.bæt ˈklaɪ.mɪt tʃeɪndʒ/', pos:'v phrase',
+    vi:'Chống biến đổi khí hậu',
+    enDef:'To take active measures to reduce the causes and effects of global warming and environmental degradation',
+    collocations:['combat climate change through sustainable transport','combat climate change by reducing emissions','measures to combat climate change','cycling helps combat climate change'],
+    collocationVi:['chống biến đổi khí hậu qua giao thông bền vững','chống biến đổi khí hậu bằng cách giảm khí thải','các biện pháp chống biến đổi khí hậu','đạp xe giúp chống biến đổi khí hậu'],
+    synonyms:['fight global warming','address climate crisis','tackle environmental change','mitigate climate effects'],
+    synonymsVi:['chống lại sự nóng lên toàn cầu','giải quyết khủng hoảng khí hậu','giải quyết biến đổi môi trường','giảm nhẹ tác động khí hậu'],
+    antonyms:['worsen climate change','contribute to global warming','ignore environmental issues','accelerate climate degradation'],
+    antonymsVi:['làm trầm trọng biến đổi khí hậu','góp phần vào sự nóng lên toàn cầu','bỏ qua vấn đề môi trường','tăng tốc sự xuống cấp khí hậu'],
+    wordFamily:['combat (v/n)','climate (n)','change (n/v)','climatic (adj)'],
+    wordFamilyVi:['chống (động từ/danh từ)','khí hậu (danh từ)','sự thay đổi (danh từ/động từ)','thuộc về khí hậu (tính từ)'],
+    example:'"Widespread adoption of cycling as a mode of transport is one effective way for cities to combat climate change and improve air quality."',
+    exampleVi:'"Áp dụng rộng rãi xe đạp như một phương tiện đi lại là một cách hiệu quả để các thành phố chống biến đổi khí hậu và cải thiện chất lượng không khí."',
+    usage:'combat / fight + climate change + through + N',
+    topic:'cars_bicycles'
+  },
+  {
+    id:59, en:'sustainable mode of transport', ipa:'/səˈsteɪ.nə.bəl məʊd əv ˈtræns.pɔːt/', pos:'n phrase',
+    vi:'Phương tiện giao thông bền vững',
+    enDef:'A form of transportation that meets current mobility needs without harming the environment or depleting natural resources for future generations',
+    collocations:['adopt a sustainable mode of transport','bicycles as a sustainable mode of transport','promote sustainable modes of transport','shift to a sustainable mode of transport'],
+    collocationVi:['áp dụng phương tiện giao thông bền vững','xe đạp như một phương tiện giao thông bền vững','thúc đẩy các phương tiện giao thông bền vững','chuyển sang phương tiện giao thông bền vững'],
+    synonyms:['eco-friendly transport','green commuting option','low-carbon transport','environmentally responsible travel'],
+    synonymsVi:['phương tiện thân thiện với môi trường','lựa chọn đi lại xanh','phương tiện ít carbon','di chuyển có trách nhiệm với môi trường'],
+    antonyms:['carbon-intensive transport','fossil-fuel dependent travel','unsustainable commuting','polluting vehicles'],
+    antonymsVi:['phương tiện thải nhiều carbon','di chuyển phụ thuộc nhiên liệu hóa thạch','đi lại không bền vững','phương tiện gây ô nhiễm'],
+    wordFamily:['sustain (v)','sustainable (adj)','sustainability (n)','transport (n)'],
+    wordFamilyVi:['duy trì (động từ)','bền vững (tính từ)','tính bền vững (danh từ)','giao thông (danh từ)'],
+    example:'"Bicycles represent a sustainable mode of transport that produces zero emissions and reduces the ecological footprint of urban commuters."',
+    exampleVi:'"Xe đạp đại diện cho một phương tiện giao thông bền vững không thải ra khí thải và giảm dấu chân sinh thái của người đi làm ở đô thị."',
+    usage:'a sustainable mode of transport / eco-friendly commuting option',
+    topic:'cars_bicycles'
+  },
+  {
+    id:60, en:'improve physical fitness', ipa:'/ɪmˈpruːv ˈfɪz.ɪ.kəl ˈfɪt.nɪs/', pos:'v phrase',
+    vi:'Cải thiện thể chất',
+    enDef:'To enhance one\'s overall bodily health, strength, and cardiovascular endurance through regular physical activity such as cycling',
+    collocations:['improve physical fitness through cycling','cycling improves physical fitness','improve physical fitness and mental health','encourage people to improve physical fitness'],
+    collocationVi:['cải thiện thể chất qua đạp xe','đạp xe cải thiện thể chất','cải thiện thể chất và sức khỏe tâm thần','khuyến khích mọi người cải thiện thể chất'],
+    synonyms:['enhance physical health','boost bodily fitness','improve cardiovascular health','strengthen physical well-being'],
+    synonymsVi:['nâng cao sức khỏe thể chất','tăng cường thể lực','cải thiện sức khỏe tim mạch','tăng cường sức khỏe thể chất'],
+    antonyms:['worsen physical health','promote a sedentary lifestyle','harm physical fitness','neglect bodily health'],
+    antonymsVi:['làm xấu đi sức khỏe thể chất','thúc đẩy lối sống ít vận động','gây hại cho thể chất','bỏ bê sức khỏe thể chất'],
+    wordFamily:['improve (v)','improvement (n)','physical (adj)','fitness (n)'],
+    wordFamilyVi:['cải thiện (động từ)','sự cải thiện (danh từ)','thể chất (tính từ)','thể lực (danh từ)'],
+    example:'"Cycling as a daily commute helps improve physical fitness while simultaneously reducing traffic congestion and air pollution."',
+    exampleVi:'"Đạp xe đi làm hàng ngày giúp cải thiện thể chất trong khi đồng thời giảm tắc nghẽn giao thông và ô nhiễm không khí."',
+    usage:'improve / boost + physical fitness / bodily health',
+    topic:'cars_bicycles'
+  },
+  {
+    id:61, en:'sedentary lifestyle', ipa:'/ˈsed.ən.tri ˈlaɪf.staɪl/', pos:'n phrase',
+    vi:'Lối sống ít vận động',
+    enDef:'A way of living characterised by prolonged sitting or physical inactivity, often linked to poor health outcomes',
+    collocations:['promote a sedentary lifestyle','cars encourage a sedentary lifestyle','avoid a sedentary lifestyle','sedentary lifestyle leads to chronic disease'],
+    collocationVi:['thúc đẩy lối sống ít vận động','xe hơi khuyến khích lối sống ít vận động','tránh lối sống ít vận động','lối sống ít vận động dẫn đến bệnh mãn tính'],
+    synonyms:['inactive lifestyle','physically passive life','couch-potato lifestyle','low-activity living'],
+    synonymsVi:['lối sống không hoạt động','cuộc sống thụ động về thể chất','lối sống lười biếng','cuộc sống ít hoạt động'],
+    antonyms:['active lifestyle','physically engaged life','exercise-oriented living','health-conscious routine'],
+    antonymsVi:['lối sống năng động','cuộc sống tích cực về thể chất','cuộc sống hướng tới tập thể dục','thói quen có ý thức sức khỏe'],
+    wordFamily:['sedentary (adj)','lifestyle (n)','inactive (adj)','inactivity (n)'],
+    wordFamilyVi:['ít vận động (tính từ)','lối sống (danh từ)','không hoạt động (tính từ)','sự không hoạt động (danh từ)'],
+    example:'"Heavy reliance on cars encourages a sedentary lifestyle, which is linked to obesity, heart disease, and other chronic health conditions."',
+    exampleVi:'"Sự phụ thuộc nhiều vào xe hơi khuyến khích lối sống ít vận động, liên quan đến béo phì, bệnh tim và các tình trạng sức khỏe mãn tính khác."',
+    usage:'encourage / lead to a sedentary lifestyle',
+    topic:'cars_bicycles'
+  },
+  {
+    id:62, en:'boost mental well-being', ipa:'/buːst ˈmen.təl ˌwel.ˈbiː.ɪŋ/', pos:'v phrase',
+    vi:'Cải thiện sức khỏe tâm thần',
+    enDef:'To enhance psychological health, reduce stress, and improve mood through physical activity and positive habits such as cycling',
+    collocations:['cycling boosts mental well-being','boost mental well-being through exercise','boost mental well-being and reduce stress','encourage activities that boost mental well-being'],
+    collocationVi:['đạp xe cải thiện sức khỏe tâm thần','cải thiện sức khỏe tâm thần qua tập thể dục','cải thiện sức khỏe tâm thần và giảm căng thẳng','khuyến khích các hoạt động cải thiện sức khỏe tâm thần'],
+    synonyms:['improve mental health','enhance psychological well-being','reduce stress and anxiety','promote emotional wellness'],
+    synonymsVi:['cải thiện sức khỏe tâm thần','nâng cao sức khỏe tâm lý','giảm căng thẳng và lo âu','thúc đẩy sức khỏe cảm xúc'],
+    antonyms:['harm mental health','worsen psychological well-being','increase stress levels','deteriorate emotional health'],
+    antonymsVi:['gây hại cho sức khỏe tâm thần','làm xấu đi sức khỏe tâm lý','tăng mức độ căng thẳng','làm suy giảm sức khỏe cảm xúc'],
+    wordFamily:['boost (v/n)','mental (adj)','well-being (n)','wellness (n)'],
+    wordFamilyVi:['tăng cường (động từ/danh từ)','tâm thần (tính từ)','sức khỏe (danh từ)','sự lành mạnh (danh từ)'],
+    example:'"Regular cycling not only improves physical fitness but also boosts mental well-being by reducing stress and releasing endorphins."',
+    exampleVi:'"Đạp xe thường xuyên không chỉ cải thiện thể chất mà còn cải thiện sức khỏe tâm thần bằng cách giảm căng thẳng và giải phóng endorphin."',
+    usage:'boost / improve + mental well-being / psychological health',
+    topic:'cars_bicycles'
+  },
+  {
+    id:63, en:'ease traffic pressure', ipa:'/iːz ˈtræf.ɪk ˈpreʃ.ər/', pos:'v phrase',
+    vi:'Giảm áp lực giao thông',
+    enDef:'To reduce the burden on road networks by decreasing the number of vehicles, leading to smoother traffic flow',
+    collocations:['bikes ease traffic pressure','ease traffic pressure in city centres','ease traffic pressure significantly','cycling policies ease traffic pressure'],
+    collocationVi:['xe đạp giảm áp lực giao thông','giảm áp lực giao thông ở trung tâm thành phố','giảm đáng kể áp lực giao thông','chính sách đạp xe giảm áp lực giao thông'],
+    synonyms:['relieve traffic congestion','reduce road pressure','alleviate gridlock','decongest roads'],
+    synonymsVi:['giảm tắc nghẽn giao thông','giảm áp lực đường bộ','giảm bớt ùn tắc','giải phóng tắc nghẽn'],
+    antonyms:['worsen traffic congestion','increase road pressure','add to gridlock','exacerbate traffic jams'],
+    antonymsVi:['làm trầm trọng tắc nghẽn giao thông','tăng áp lực đường bộ','thêm vào ùn tắc','làm nặng thêm tắc xe'],
+    wordFamily:['ease (v/n)','traffic (n)','pressure (n)','pressurize (v)'],
+    wordFamilyVi:['giảm bớt (động từ/danh từ)','giao thông (danh từ)','áp lực (danh từ)','tạo áp lực (động từ)'],
+    example:'"Widespread use of bicycles can significantly ease traffic pressure in congested city centres, benefiting all road users."',
+    exampleVi:'"Việc sử dụng rộng rãi xe đạp có thể giảm đáng kể áp lực giao thông ở trung tâm thành phố tắc nghẽn, mang lại lợi ích cho tất cả người dùng đường."',
+    usage:'ease / relieve + traffic pressure / congestion',
+    topic:'cars_bicycles'
+  },
+  {
+    id:64, en:'long-term economic prosperity', ipa:'/lɒŋ tɜːm ˌiː.kəˈnɒm.ɪk prɒsˈper.ɪ.ti/', pos:'n phrase',
+    vi:'Thịnh vượng kinh tế lâu dài',
+    enDef:'Sustained and enduring economic growth, wealth, and high living standards enjoyed by a society over an extended period',
+    collocations:['enjoy long-term economic prosperity','long-term economic prosperity reduces status concerns','achieve long-term economic prosperity','long-term economic prosperity changes consumption patterns'],
+    collocationVi:['hưởng sự thịnh vượng kinh tế lâu dài','thịnh vượng kinh tế lâu dài giảm lo lắng về địa vị','đạt được sự thịnh vượng kinh tế lâu dài','thịnh vượng kinh tế lâu dài thay đổi mô hình tiêu dùng'],
+    synonyms:['sustained economic growth','enduring financial success','long-standing economic well-being','durable economic development'],
+    synonymsVi:['tăng trưởng kinh tế bền vững','thành công tài chính lâu dài','phúc lợi kinh tế lâu dài','phát triển kinh tế bền vững'],
+    antonyms:['economic instability','short-term growth','economic stagnation','financial volatility'],
+    antonymsVi:['bất ổn kinh tế','tăng trưởng ngắn hạn','trì trệ kinh tế','biến động tài chính'],
+    wordFamily:['prosper (v)','prosperity (n)','prosperous (adj)','economic (adj)'],
+    wordFamilyVi:['thịnh vượng (động từ)','sự thịnh vượng (danh từ)','phồn thịnh (tính từ)','kinh tế (tính từ)'],
+    example:'"Citizens in nations that have enjoyed long-term economic prosperity tend to be secure in their social standing and place less emphasis on status symbols like cars."',
+    exampleVi:'"Người dân ở các quốc gia đã hưởng sự thịnh vượng kinh tế lâu dài có xu hướng tự tin về địa vị xã hội và ít coi trọng các biểu tượng địa vị như xe hơi."',
+    usage:'enjoy / achieve + long-term economic prosperity',
+    topic:'cars_bicycles'
+  },
+  {
+    id:65, en:'place less emphasis on status symbols', ipa:'/pleɪs les ˈem.fə.sɪs ɒn ˈsteɪ.təs ˈsɪm.bəlz/', pos:'v phrase',
+    vi:'Ít coi trọng biểu tượng địa vị',
+    enDef:'To care less about possessions or choices that signal wealth or social rank, because one\'s position in society is already secure',
+    collocations:['place less emphasis on status symbols','shift away from status symbols','material possessions no longer define success','less concerned about social perception'],
+    collocationVi:['ít coi trọng biểu tượng địa vị','chuyển dịch khỏi biểu tượng địa vị','vật chất không còn định nghĩa thành công','ít quan tâm về nhận thức xã hội'],
+    synonyms:['care less about status','downplay material prestige','reduce emphasis on wealth symbols','shift away from status-driven consumption'],
+    synonymsVi:['ít quan tâm đến địa vị','hạ thấp uy tín vật chất','giảm nhấn mạnh vào biểu tượng của cải','chuyển dịch khỏi tiêu dùng vì địa vị'],
+    antonyms:['prioritize status symbols','rely on material possessions for identity','flaunt wealth','be status-conscious'],
+    antonymsVi:['ưu tiên biểu tượng địa vị','dựa vào vật chất để xác định bản thân','phô trương của cải','có ý thức về địa vị'],
+    wordFamily:['place (v)','emphasis (n)','emphasize (v)','status (n)','symbol (n)'],
+    wordFamilyVi:['đặt (động từ)','sự nhấn mạnh (danh từ)','nhấn mạnh (động từ)','địa vị (danh từ)','biểu tượng (danh từ)'],
+    example:'"As people enjoy long-term economic prosperity, they become secure in their social standing and place less emphasis on status symbols, choosing bicycles over cars for practical or environmental reasons."',
+    exampleVi:'"Khi người dân được hưởng sự thịnh vượng kinh tế lâu dài, họ tự tin về địa vị xã hội và ít coi trọng biểu tượng địa vị, chọn xe đạp thay vì xe hơi vì lý do thực tế hoặc môi trường."',
+    usage:'place less emphasis on + status symbols / material possessions',
+    topic:'cars_bicycles'
+  },
+  {
+    id:66, en:'reduce carbon footprint', ipa:'/rɪˈdjuːs ˈkɑː.bən ˈfʊt.prɪnt/', pos:'v phrase',
+    vi:'Giảm dấu chân carbon',
+    enDef:'To lower the total amount of greenhouse gases produced directly or indirectly by an individual, organization, or activity',
+    collocations:['reduce carbon footprint through cycling','significantly reduce one\'s carbon footprint','reduce the carbon footprint of commuting','encourage people to reduce their carbon footprint'],
+    collocationVi:['giảm dấu chân carbon qua đạp xe','giảm đáng kể dấu chân carbon','giảm dấu chân carbon của việc đi làm','khuyến khích mọi người giảm dấu chân carbon'],
+    synonyms:['lower greenhouse gas impact','minimize environmental impact','cut carbon output','reduce ecological footprint'],
+    synonymsVi:['giảm tác động khí nhà kính','giảm thiểu tác động môi trường','cắt giảm lượng carbon thải ra','giảm dấu chân sinh thái'],
+    antonyms:['increase carbon footprint','worsen environmental impact','raise greenhouse gas output'],
+    antonymsVi:['tăng dấu chân carbon','làm xấu đi tác động môi trường','tăng lượng khí nhà kính thải ra'],
+    wordFamily:['reduce (v)','carbon (n)','footprint (n)','ecological (adj)'],
+    wordFamilyVi:['giảm (động từ)','carbon (danh từ)','dấu chân (danh từ)','sinh thái (tính từ)'],
+    example:'"Commuting by bicycle instead of car is one of the most effective ways individuals can reduce their carbon footprint and contribute to environmental sustainability."',
+    exampleVi:'"Đi làm bằng xe đạp thay vì xe hơi là một trong những cách hiệu quả nhất để cá nhân giảm dấu chân carbon và đóng góp vào tính bền vững môi trường."',
+    usage:'reduce / minimize + carbon footprint + through + N',
+    topic:'cars_bicycles'
+  },
+  {
+    id:67, en:'cost-effective commuting', ipa:'/ˌkɒst ɪˈfek.tɪv kəˈmjuː.tɪŋ/', pos:'n phrase',
+    vi:'Đi lại tiết kiệm chi phí',
+    enDef:'A mode of travelling to work or school that provides good value for money, typically with low operating, maintenance, and fuel costs',
+    collocations:['cycling as cost-effective commuting','cost-effective commuting option','choose cost-effective commuting','cycling is an extremely cost-effective commuting method'],
+    collocationVi:['đạp xe như đi lại tiết kiệm chi phí','lựa chọn đi lại tiết kiệm chi phí','chọn đi lại tiết kiệm chi phí','đạp xe là phương pháp đi lại cực kỳ tiết kiệm chi phí'],
+    synonyms:['affordable transport','economical commuting','budget-friendly travel','low-cost transport option'],
+    synonymsVi:['phương tiện giá cả phải chăng','đi lại tiết kiệm','di chuyển thân thiện với túi tiền','lựa chọn phương tiện chi phí thấp'],
+    antonyms:['expensive commuting','costly transport','financially burdensome travel','high-cost transportation'],
+    antonymsVi:['đi lại tốn kém','phương tiện đắt tiền','di chuyển gánh nặng tài chính','phương tiện chi phí cao'],
+    wordFamily:['cost (n)','cost-effective (adj)','commute (v/n)','commuter (n)'],
+    wordFamilyVi:['chi phí (danh từ)','tiết kiệm chi phí (tính từ)','đi lại (động từ/danh từ)','người đi làm (danh từ)'],
+    example:'"Bicycles offer extremely cost-effective commuting, eliminating fuel expenses and reducing maintenance costs compared to car ownership."',
+    exampleVi:'"Xe đạp cung cấp phương tiện đi lại cực kỳ tiết kiệm chi phí, loại bỏ chi phí nhiên liệu và giảm chi phí bảo trì so với việc sở hữu xe hơi."',
+    usage:'cost-effective + commuting / transport option',
+    topic:'cars_bicycles'
+  },
+  {
+    id:68, en:'be more health-conscious', ipa:'/biː mɔːr ˈhelθ ˈkɒn.ʃəs/', pos:'adj phrase',
+    vi:'Quan tâm hơn đến sức khỏe',
+    enDef:'To be more aware of and actively attentive to one\'s physical health, making lifestyle choices that promote well-being',
+    collocations:['be more health-conscious in developed countries','become increasingly health-conscious','health-conscious citizens choose cycling','be more health-conscious and active'],
+    collocationVi:['quan tâm đến sức khỏe hơn ở các nước phát triển','ngày càng quan tâm đến sức khỏe','công dân quan tâm đến sức khỏe chọn đạp xe','quan tâm đến sức khỏe và năng động hơn'],
+    synonyms:['health-aware','wellness-focused','fitness-minded','health-oriented'],
+    synonymsVi:['có nhận thức về sức khỏe','tập trung vào sức khỏe','tư duy hướng tới thể lực','định hướng sức khỏe'],
+    antonyms:['health-indifferent','neglectful of health','unaware of health risks','health-ignorant'],
+    antonymsVi:['thờ ơ với sức khỏe','bỏ bê sức khỏe','không nhận thức được rủi ro sức khỏe','thiếu hiểu biết về sức khỏe'],
+    wordFamily:['health (n)','healthy (adj)','conscious (adj)','consciousness (n)'],
+    wordFamilyVi:['sức khỏe (danh từ)','lành mạnh (tính từ)','có ý thức (tính từ)','ý thức (danh từ)'],
+    example:'"Citizens in wealthier nations tend to be more health-conscious, recognising the physical benefits of cycling over driving and actively choosing it as their daily commute."',
+    exampleVi:'"Người dân ở các quốc gia giàu có hơn có xu hướng quan tâm đến sức khỏe hơn, nhận ra lợi ích thể chất của đạp xe so với lái xe và chủ động chọn nó làm phương tiện đi làm hàng ngày."',
+    usage:'be more / increasingly + health-conscious',
+    topic:'cars_bicycles'
+  },
+  {
+    id:69, en:'prioritize sustainability', ipa:'/praɪˈɒr.ɪ.taɪz səˌsteɪ.nəˈbɪl.ɪ.ti/', pos:'v phrase',
+    vi:'Ưu tiên tính bền vững',
+    enDef:'To give importance to making choices that protect the environment and ensure resources for future generations',
+    collocations:['prioritize sustainability over convenience','prioritize sustainability in transport choices','prioritize sustainability and reduce emissions','citizens who prioritize sustainability'],
+    collocationVi:['ưu tiên tính bền vững hơn sự tiện lợi','ưu tiên tính bền vững trong lựa chọn phương tiện','ưu tiên tính bền vững và giảm khí thải','công dân ưu tiên tính bền vững'],
+    synonyms:['value environmental sustainability','embrace green living','put sustainability first','champion eco-friendly choices'],
+    synonymsVi:['coi trọng tính bền vững môi trường','đón nhận lối sống xanh','đặt tính bền vững lên hàng đầu','ủng hộ các lựa chọn thân thiện môi trường'],
+    antonyms:['disregard sustainability','prioritize short-term convenience','ignore environmental impact','choose unsustainable options'],
+    antonymsVi:['bỏ qua tính bền vững','ưu tiên sự tiện lợi ngắn hạn','bỏ qua tác động môi trường','chọn các lựa chọn không bền vững'],
+    wordFamily:['prioritize (v)','priority (n)','sustain (v)','sustainability (n)'],
+    wordFamilyVi:['ưu tiên (động từ)','ưu tiên hàng đầu (danh từ)','duy trì (động từ)','tính bền vững (danh từ)'],
+    example:'"In many developed cities, residents prioritize sustainability and choose cycling as a way to reduce their environmental impact while improving their health."',
+    exampleVi:'"Ở nhiều thành phố phát triển, cư dân ưu tiên tính bền vững và chọn đạp xe như một cách để giảm tác động môi trường trong khi cải thiện sức khỏe."',
+    usage:'prioritize + sustainability / environmental impact / green living',
+    topic:'cars_bicycles'
+  }
+];
+
+// ===== AUDIO =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function getAudioCtx(){
+  try{if(!audioCtx)audioCtx=new AudioCtx();return audioCtx}catch(e){console.warn("Audio context failed:",e);return null}
+}
+function playDing(){
+  try{
+    const c=getAudioCtx();if(!c)return;
+    const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=880;g.gain.value=0.3;o.start();g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5);o.stop(c.currentTime+0.5)
+  }catch(e){console.warn("Ding failed:",e)}
+}
+function playBuzz(){
+  try{
+    const c=getAudioCtx();if(!c)return;
+    const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';o.frequency.value=150;g.gain.value=0.15;o.start();g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.3);o.stop(c.currentTime+0.3)
+  }catch(e){console.warn("Buzz failed:",e)}
+}
+function speakWord(word){
+  try{
+    if(!window.speechSynthesis)return;
+    const u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=0.85;speechSynthesis.speak(u)
+  }catch(e){console.warn("Speech failed:",e)}
+}
+
+// ===== CONFETTI =====
+function showConfetti(){
+  const c=document.createElement('div');c.className='confetti';document.body.appendChild(c);
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');
+    p.style.cssText=`position:fixed;width:8px;height:8px;background:${['#FFAFCC','#457B9D','#A8DADC','#FFD700','#FF6B6B'][Math.floor(Math.random()*5)]};border-radius:50%;left:${Math.random()*100}%;top:-10px;z-index:9999;animation:fall ${1+Math.random()*2}s ease-out forwards`;
+    c.appendChild(p)
+  }
+  const s=document.createElement('style');s.textContent='@keyframes fall{to{top:100%;opacity:0}}';document.head.appendChild(s);
+  setTimeout(()=>{c.remove();s.remove()},3000)
+}
+
+// ===== TOAST =====
+function showToast(msg,type='success'){
+  const t=document.createElement('div');t.className='toast';
+  t.style.background=type==='success'?'var(--success)':'var(--error)';
+  t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)
+}
+
+// ===== STATE =====
+let currentScreen='home';
+let currentGame=null;
+let currentTopic=null;
+let gameQuestions=[];
+let currentQ=0;
+let score=0;
+let answered=false;
+
+// Load progress from localStorage
+let progress={p1:0,p2:0,p3:0,p4:0};
+try{
+  const saved=localStorage.getItem('vocab_decentralization_progress');
+  if(saved)progress=JSON.parse(saved);
+}catch(e){}
+
+function saveProgress(){
+  try{localStorage.setItem('vocab_decentralization_progress',JSON.stringify(progress))}catch(e){}
+}
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+
+// ===== RENDER =====
+function render(){
+  const app=document.getElementById('app');
+  if(!app){console.error("App container not found!");return}
+  switch(currentScreen){
+    case 'home':renderHome(app);break;
+    case 'vocab':renderVocabList(app);break;
+    case 'game':renderGame(app);break;
+    case 'result':renderResult(app);break;
+  }
+  if(window.lucide){lucide.createIcons();}
+}
+
+const TOPICS = [
+  {
+    id: 'decentralization',
+    emoji: '🏙️',
+    label: 'Writing 8A – Practice 0',
+    question: 'Some governments want to move factories and businesses out of cities. Do the advantages outweigh the disadvantages?',
+    color: '#457B9D',
+    bg: '#e8f4f8'
+  },
+  {
+    id: 'children_later',
+    emoji: '👶',
+    label: 'Writing 10A – Practice 1',
+    question: 'Many people nowadays decide to have children later in life. What are the reasons and what are the effects of this tendency on family life and society?',
+    color: '#6a4c93',
+    bg: '#f0ebfa'
+  },
+  {
+    id: 'parental_pressure',
+    emoji: '📚',
+    label: 'Writing 10A – Practice 2',
+    question: 'Some parents nowadays put more pressure on their children to succeed. Why is this the case? Is it a negative or positive trend?',
+    color: '#e07b39',
+    bg: '#fef3ea'
+  },
+  {
+    id: 'cars_bicycles',
+    emoji: '🚲',
+    label: 'Writing 10A – Practice 3',
+    question: 'In some cities, people are choosing cars instead of bicycles, while in other cities, riding bikes is replacing cars. Why is this the case? Which development do you think is better?',
+    color: '#2a9d5c',
+    bg: '#e8f8ef'
+  }
+];
+
+function renderHome(app){
+  const total=VOCAB.length;
+  const learned=Math.round((progress.p1+progress.p2+progress.p3+progress.p4)/4);
+  app.innerHTML=`
+  <div class="min-h-full p-5 fade-in">
+    <div class="max-w-lg mx-auto">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-800 mb-1" style="color:var(--dark)">📖 VOCABULARY GAME</h1>
+        <p class="text-sm opacity-70">IELTS 7.0 • Writing 8A • ${total} từ vựng</p>
+      </div>
+
+      <!-- Overall progress -->
+      <div class="rounded-2xl p-4 mb-5" style="background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+        <div class="flex justify-between text-xs font-600 mb-2" style="color:var(--dark)"><span>Tiến độ chung</span><span>${learned}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${learned}%"></div></div>
+      </div>
+
+      <!-- Topic cards -->
+      <p class="text-xs font-700 mb-3 uppercase" style="color:var(--dark);letter-spacing:1px">📂 Chủ đề theo bài</p>
+      <div class="space-y-3 mb-5">
+        ${TOPICS.map(t=>{
+          const count=VOCAB.filter(v=>(v.topic||'decentralization')===t.id).length;
+          return `<div class="rounded-xl p-4 cursor-pointer card-hover" style="background:${t.bg};border-left:4px solid ${t.color}" onclick="currentTopic='${t.id}';currentScreen='vocab';render()">
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">${t.emoji}</span>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-700 mb-1" style="color:${t.color}">${t.label} • ${count} từ</div>
+                <p class="text-xs leading-relaxed" style="color:#444;opacity:.9">${t.question}</p>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Game buttons -->
+      <p class="text-xs font-700 mb-3 uppercase" style="color:var(--dark);letter-spacing:1px">🎮 Luyện tập</p>
+      <div class="space-y-3">
+        <button onclick="startGame(1)" class="btn-primary w-full flex items-center gap-3 text-base"><span>🔵</span> Phần 1: Multiple Choice</button>
+        <button onclick="startGame(2)" class="btn-pink w-full flex items-center gap-3 text-base"><span>🟡</span> Phần 2: Fill in the Blank</button>
+        <button onclick="startGame(3)" class="btn-primary w-full flex items-center gap-3 text-base"><span>🟣</span> Phần 3: Mixed Mode</button>
+        <button onclick="startGame(4)" class="btn-pink w-full flex items-center gap-3 text-base"><span>🔴</span> Phần 4: Master Test</button>
+        <button onclick="currentTopic=null;currentScreen='vocab';render()" class="w-full py-3 rounded-xl font-600 flex items-center justify-center gap-2" style="background:var(--dark);color:#fff"><span>📘</span> Tất cả từ vựng (${total} từ)</button>
+      </div>
+
+      <div class="mt-5 grid grid-cols-4 gap-2">
+        ${[['P1',progress.p1,'🔵'],['P2',progress.p2,'🟡'],['P3',progress.p3,'🟣'],['P4',progress.p4,'🔴']].map(([l,p,e])=>`<div class="text-center p-3 rounded-xl" style="background:#fff"><div class="text-lg">${e}</div><div class="text-xs font-600 mt-1">${l}</div><div class="text-xs opacity-60">${p}%</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function startGame(part){
+  currentGame=part;currentQ=0;score=0;answered=false;
+  if(part===1)generateMC();
+  else if(part===2)generateFIB();
+  else if(part===3)generateMixed();
+  else if(part===4)generateMaster();
+  currentScreen='game';render();
+}
+
+// ===== PART 1: MULTIPLE CHOICE =====
+function generateMC(){
+  gameQuestions=shuffle(VOCAB).map(v=>{
+    const wrongs=shuffle(VOCAB.filter(x=>x.id!==v.id)).slice(0,3);
+    const opts=shuffle([v,...wrongs]);
+    return{type:'mc',vocab:v,options:opts,correctId:v.id};
+  });
+}
+
+// ===== PART 2: FILL IN BLANK =====
+function generateFIB(){
+  gameQuestions=shuffle(VOCAB).map(v=>({type:'fib',vocab:v}));
+}
+
+// ===== PART 3: MIXED =====
+function generateMixed(){
+  const all=shuffle(VOCAB);
+  gameQuestions=[];
+  all.forEach((v,i)=>{
+    const mode=i%4;
+    if(mode===0){
+      const wrongs=shuffle(VOCAB.filter(x=>x.id!==v.id)).slice(0,3);
+      const opts=shuffle([v,...wrongs]);
+      gameQuestions.push({type:'mc',vocab:v,options:opts,correctId:v.id});
+    }else if(mode===1){
+      gameQuestions.push({type:'fib',vocab:v});
+    }else if(mode===2){
+      gameQuestions.push({type:'sentence',vocab:v});
+    }else{
+      const wrongs=shuffle(VOCAB.filter(x=>x.id!==v.id)).slice(0,3);
+      const opts=shuffle([v,...wrongs]);
+      gameQuestions.push({type:'mc_reverse',vocab:v,options:opts,correctId:v.id});
+    }
+  });
+}
+
+// ===== PART 4: MASTER =====
+function generateMaster(){
+  const all=shuffle(VOCAB);
+  gameQuestions=[];
+  all.forEach((v,i)=>{
+    const mode=i%2;
+    if(mode===0){
+      const wrongs=shuffle(VOCAB.filter(x=>x.id!==v.id)).slice(0,3);
+      const opts=shuffle([v,...wrongs]);
+      gameQuestions.push({type:'master_mc',vocab:v,options:opts,correctId:v.id});
+    }else{
+      gameQuestions.push({type:'sentence',vocab:v});
+    }
+  });
+}
+
+function renderGame(app){
+  if(currentQ>=gameQuestions.length){
+    const pct=Math.round(score/gameQuestions.length*100);
+    progress[`p${currentGame}`]=Math.max(progress[`p${currentGame}`],pct);
+    saveProgress();
+    currentScreen='result';render();return;
+  }
+  const q=gameQuestions[currentQ];
+  const titles=['','🔵 Multiple Choice','🟡 Fill in the Blank','🟣 Mixed Mode','🔴 Master Test'];
+  app.innerHTML=`
+  <div class="min-h-full p-4 fade-in">
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center justify-between mb-4">
+        <button onclick="currentScreen='home';render()" class="p-2 rounded-lg" style="background:#fff"><i data-lucide="arrow-left" style="width:20px;height:20px"></i></button>
+        <span class="font-700 text-sm" style="color:var(--dark)">${titles[currentGame]}</span>
+        <span class="text-sm font-600 px-3 py-1 rounded-full" style="background:#fff;color:var(--dark)">${currentQ+1}/${gameQuestions.length}</span>
+      </div>
+      <div class="progress-bar mb-6"><div class="progress-fill" style="width:${(currentQ/gameQuestions.length)*100}%"></div></div>
+      <div class="text-center mb-2"><span class="tag" style="background:var(--pink);color:var(--dark)">Score: ${score}/${currentQ}</span></div>
+      <div id="questionArea"></div>
+      <div id="explanationArea" class="mt-4"></div>
+      <div id="nextBtnArea" class="mt-4 text-center"></div>
+    </div>
+  </div>`;
+  lucide.createIcons();
+  renderQuestion(q);
+}
+
+function renderQuestion(q){
+  const area=document.getElementById('questionArea');
+  if(q.type==='mc'){
+    area.innerHTML=`
+    <div class="rounded-2xl p-5 mb-4" style="background:#fff">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="tag" style="background:var(--bg)">${q.vocab.pos}</span>
+        <button onclick="speakWord('${q.vocab.en.replace(/'/g,"\\'")}')" class="p-1 rounded-full" style="background:var(--pink)"><i data-lucide="volume-2" style="width:16px;height:16px"></i></button>
+      </div>
+      <p class="text-xl font-700 mb-1" style="color:var(--dark)">${q.vocab.vi}</p>
+      <p class="text-sm opacity-60">${q.vocab.enDef}</p>
+    </div>
+    <div class="space-y-3" id="optionsArea">
+      ${q.options.map((o,i)=>`<button class="option-btn" onclick="checkMC(${q.correctId},${o.id},this)">${String.fromCharCode(65+i)}. ${o.en}</button>`).join('')}
+    </div>`;
+  }else if(q.type==='mc_reverse'){
+    area.innerHTML=`
+    <div class="rounded-2xl p-5 mb-4" style="background:#fff">
+      <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:var(--bg)">${q.vocab.pos}</span></div>
+      <p class="text-xl font-700 mb-1" style="color:var(--dark)">${q.vocab.en}</p>
+      <p class="text-sm opacity-60">Chọn nghĩa tiếng Việt đúng:</p>
+    </div>
+    <div class="space-y-3" id="optionsArea">
+      ${q.options.map((o,i)=>`<button class="option-btn" onclick="checkMC(${q.correctId},${o.id},this)">${String.fromCharCode(65+i)}. ${o.vi}</button>`).join('')}
+    </div>`;
+  }else if(q.type==='fib'){
+    area.innerHTML=`
+    <div class="rounded-2xl p-5 mb-4" style="background:#fff">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="tag" style="background:var(--bg)">${q.vocab.pos}</span>
+        <button onclick="speakWord('${q.vocab.en.replace(/'/g,"\\'")}')" class="p-1 rounded-full" style="background:var(--pink)"><i data-lucide="volume-2" style="width:16px;height:16px"></i></button>
+      </div>
+      <p class="text-xl font-700 mb-1" style="color:var(--dark)">${q.vocab.vi}</p>
+      <p class="text-sm opacity-60 mb-3">${q.vocab.enDef}</p>
+      ${q.vocab.usage?`<p class="text-sm mb-3" style="color:var(--accent)">💡 Cấu trúc: ${q.vocab.usage}</p>`:''}
+    </div>
+    <div class="flex gap-2">
+      <input id="fibInput" class="input-field flex-1" placeholder="Nhập từ/cụm từ tiếng Anh..." autocomplete="off" onkeydown="if(event.key==='Enter')checkFIB()">
+      <button onclick="checkFIB()" class="btn-primary">Kiểm tra</button>
+    </div>`;
+    setTimeout(()=>{const inp=document.getElementById('fibInput');if(inp)inp.focus()},100);
+  }else if(q.type==='sentence'){
+    const sent=q.vocab.example.replace(/"/g,'');
+    const word=q.vocab.en.split('/')[0].trim();
+    const blank=sent.replace(new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'______');
+    area.innerHTML=`
+    <div class="rounded-2xl p-5 mb-4" style="background:#fff">
+      <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:var(--bg)">${q.vocab.pos}</span></div>
+      <p class="text-sm opacity-60 mb-2">Điền từ/cụm từ thích hợp vào chỗ trống:</p>
+      <p class="text-lg font-600 mb-2" style="color:var(--dark)">${blank}</p>
+      <p class="text-sm" style="color:var(--accent)">💡 Nghĩa: ${q.vocab.vi}</p>
+    </div>
+    <div class="flex gap-2">
+      <input id="fibInput" class="input-field flex-1" placeholder="Nhập từ..." autocomplete="off" onkeydown="if(event.key==='Enter')checkSentence()">
+      <button onclick="checkSentence()" class="btn-primary">Kiểm tra</button>
+    </div>`;
+    setTimeout(()=>{const inp=document.getElementById('fibInput');if(inp)inp.focus()},100);
+  }else if(q.type==='master_mc'){
+    area.innerHTML=`
+    <div class="rounded-2xl p-5 mb-4" style="background:#fff">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="tag" style="background:#FFD700;color:#000;font-weight:bold">⭐ MASTER MODE</span>
+        <span class="text-xs font-600" style="color:var(--error)">HARD</span>
+      </div>
+      <p class="text-sm opacity-70 mb-3">📖 Read the definition and guess the phrase:</p>
+      <div class="rounded-xl p-4 mb-4" style="background:#f9f3e8;border-left:4px solid var(--accent)">
+        <p class="font-700 text-lg leading-relaxed" style="color:var(--dark)">${q.vocab.enDef}</p>
+      </div>
+      <p class="text-xs opacity-60">Choose the correct English word/phrase:</p>
+    </div>
+    <div class="space-y-3" id="optionsArea">
+      ${q.options.map((o,i)=>`<button class="option-btn" onclick="checkMC(${q.correctId},${o.id},this)">${String.fromCharCode(65+i)}. ${o.en}</button>`).join('')}
+    </div>`;
+  }
+  lucide.createIcons();
+}
+
+function checkMC(correctId,chosenId,btn){
+  if(answered)return;answered=true;
+  const btns=document.querySelectorAll('.option-btn');
+  btns.forEach(b=>{b.style.pointerEvents='none';});
+  if(chosenId===correctId){
+    btn.classList.add('correct');score++;playDing();showConfetti();
+    showToast('✅ Chính xác!','success');
+  }else{
+    btn.classList.add('wrong');playBuzz();
+    btns.forEach(b=>{if(b.textContent.includes(VOCAB.find(v=>v.id===correctId).en))b.classList.add('correct')});
+    showToast('❌ Sai rồi!','error');
+  }
+  showExplanation(gameQuestions[currentQ].vocab);showNextBtn();
+}
+
+function checkFIB(){
+  if(answered)return;
+  const inp=document.getElementById('fibInput');
+  const val=inp.value.trim().toLowerCase();
+  const q=gameQuestions[currentQ];
+  const correct=q.vocab.en.toLowerCase();
+  const alts=[correct];
+  answered=true;
+  if(alts.some(a=>val===a||val===a.replace(/\s+/g,' '))||correct.includes(val)&&val.length>3){
+    inp.style.borderColor='var(--success)';inp.style.background='#d4edda';score++;playDing();showConfetti();
+    showToast('✅ Chính xác!','success');
+  }else{
+    inp.style.borderColor='var(--error)';inp.style.background='#f8d7da';playBuzz();
+    showToast(`Đáp án: ${q.vocab.en}`,'error');
+  }
+  showExplanation(q.vocab);showNextBtn();
+}
+
+function checkSentence(){
+  if(answered)return;
+  const inp=document.getElementById('fibInput');
+  const val=inp.value.trim().toLowerCase();
+  const q=gameQuestions[currentQ];
+  const word=q.vocab.en.toLowerCase().split('/')[0].trim();
+  const words=[word];
+  answered=true;
+  if(words.some(w=>val===w||val.includes(w)&&val.length>3)){
+    inp.style.borderColor='var(--success)';inp.style.background='#d4edda';score++;playDing();showConfetti();
+    showToast('✅ Chính xác!','success');
+  }else{
+    inp.style.borderColor='var(--error)';inp.style.background='#f8d7da';playBuzz();
+    showToast(`Đáp án: ${q.vocab.en}`,'error');
+  }
+  showExplanation(q.vocab);showNextBtn();
+}
+
+function showNextBtn(){
+  document.getElementById('nextBtnArea').innerHTML=`<button onclick="nextQuestion()" class="btn-primary text-lg px-8">Câu tiếp theo →</button>`;
+}
+
+function nextQuestion(){currentQ++;answered=false;renderGame(document.getElementById('app'));}
+
+function showExplanation(v){
+  document.getElementById('explanationArea').innerHTML=`
+  <div class="rounded-2xl p-5 fade-in" style="background:#f0f8ff;border:2px solid #d0e8f0">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="font-700 text-lg" style="color:var(--accent)">📖 Deep Dive: Chi tiết từ vựng</span>
+      <button onclick="speakWord('${v.en.replace(/'/g,"\\'")}')" class="p-1 rounded-full" style="background:var(--pink)"><i data-lucide="volume-2" style="width:14px;height:14px"></i></button>
+    </div>
+
+    <!-- WORD HEADER -->
+    <div class="p-4 rounded-xl mb-4" style="background:linear-gradient(135deg,#457B9D15 0%,#FFAFCC15 100%);border:1px solid var(--accent)">
+      <p class="font-800 text-xl" style="color:var(--dark)">${v.en}</p>
+      <p class="text-xs opacity-70 mt-1">${v.ipa} <span class="tag" style="background:var(--accent);color:#fff">${v.pos}</span></p>
+    </div>
+
+    <!-- MEANING -->
+    <div class="mb-4">
+      <p class="text-sm font-700 mb-2" style="color:#fff;background:var(--accent);padding:8px 12px;border-radius:8px;display:inline-block">🟢 MEANING (Nghĩa)</p>
+      <div class="mt-3 space-y-2">
+        <div class="p-3 rounded-lg" style="background:#fff;border-left:4px solid #28a745">
+          <p class="text-xs opacity-60 mb-1">🇻🇳 Tiếng Việt:</p>
+          <p class="font-600" style="color:var(--dark)">${v.vi}</p>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#fff;border-left:4px solid #007bff">
+          <p class="text-xs opacity-60 mb-1">🇬🇧 English Definition:</p>
+          <p class="text-sm leading-relaxed">${v.enDef}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLLOCATIONS -->
+    <div class="mb-4 p-3 rounded-lg" style="background:#fff;border:1px solid #ffc107">
+      <p class="text-sm font-700 mb-2" style="color:#856404">🔗 COLLOCATIONS - Kết hợp từ thường gặp</p>
+      <div class="space-y-2">
+        ${v.collocations.map((col,i)=>`<div class="text-sm"><span style="background:var(--bg);padding:2px 8px;border-radius:6px;font-weight:600">${col}</span> <span style="opacity:.7">${v.collocationVi[i]}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- SYNONYMS -->
+    <div class="mb-4 p-3 rounded-lg" style="background:#fff;border:1px solid #17a2b8">
+      <p class="text-sm font-700 mb-2" style="color:#0c5460">↔️ SYNONYMS - Từ đồng nghĩa</p>
+      <div class="space-y-2">
+        ${v.synonyms.map((syn,i)=>`<div class="text-sm"><span style="background:#e2f4f8;padding:2px 8px;border-radius:6px;font-weight:600">${syn}</span> <span style="opacity:.7">${v.synonymsVi[i]}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- ANTONYMS -->
+    <div class="mb-4 p-3 rounded-lg" style="background:#fff;border:1px solid #dc3545">
+      <p class="text-sm font-700 mb-2" style="color:#721c24">⚖️ ANTONYMS - Từ trái nghĩa</p>
+      <div class="space-y-2">
+        ${v.antonyms.map((ant,i)=>`<div class="text-sm"><span style="background:#f8d7da;padding:2px 8px;border-radius:6px;font-weight:600">${ant}</span> <span style="opacity:.7">${v.antonymsVi[i]}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- WORD FAMILY -->
+    <div class="mb-4 p-3 rounded-lg" style="background:#fff;border:1px solid #6f42c1">
+      <p class="text-sm font-700 mb-2" style="color:#3e1f47">👨‍👩‍👧 WORD FAMILY - Họ từ liên quan</p>
+      <div class="space-y-2">
+        ${v.wordFamily.map((wf,i)=>`<div class="text-sm"><span style="background:#e7d4f5;padding:2px 8px;border-radius:6px;font-weight:600">${wf}</span> <span style="opacity:.7">${v.wordFamilyVi[i]}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- USAGE (if available) -->
+    ${v.usage?`<div class="mb-4 p-3 rounded-lg" style="background:#fff;border:1px solid var(--accent)">
+      <p class="text-sm font-700 mb-2" style="color:var(--dark)">💡 USAGE - Cách dùng</p>
+      <p class="text-sm p-2 rounded" style="background:#f9f9f9;color:var(--dark)">${v.usage}</p>
+    </div>`:''}
+
+    <!-- EXAMPLE -->
+    <div class="p-4 rounded-lg" style="background:#fff3cd;border:2px solid #ffc107">
+      <p class="text-sm font-700 mb-3" style="color:#856404">📝 REAL-WORLD EXAMPLE - Ví dụ thực tế</p>
+      <div class="mb-3 p-3 rounded" style="background:#fff;border-left:4px solid #ffc107">
+        <p class="text-sm italic font-600 mb-2" style="color:var(--dark)">English:</p>
+        <p class="text-sm leading-relaxed">${v.example}</p>
+      </div>
+      <div class="p-3 rounded" style="background:#fff;border-left:4px solid var(--accent)">
+        <p class="text-sm italic font-600 mb-2" style="color:var(--dark)">Tiếng Việt:</p>
+        <p class="text-sm leading-relaxed" style="color:var(--accent)">${v.exampleVi}</p>
+      </div>
+    </div>
+  </div>`;
+  lucide.createIcons();
+}
+
+function renderResult(app){
+  const total=gameQuestions.length;
+  const pct=Math.round(score/total*100);
+  const emoji=pct>=80?'🏆':pct>=60?'👍':pct>=40?'💪':'📖';
+  const msg=pct>=80?'Xuất sắc!':pct>=60?'Khá tốt!':pct>=40?'Cần ôn thêm!':'Hãy cố gắng hơn!';
+  if(pct>=80)showConfetti();
+  app.innerHTML=`
+  <div class="flex flex-col items-center justify-center min-h-full p-6 fade-in">
+    <div class="text-6xl mb-4">${emoji}</div>
+    <h2 class="text-3xl font-800 mb-2" style="color:var(--dark)">${msg}</h2>
+    <p class="text-lg mb-6 opacity-70">Điểm: ${score}/${total} (${pct}%)</p>
+    <div class="w-full max-w-xs mb-6"><div class="progress-bar" style="height:12px"><div class="progress-fill" style="width:${pct}%"></div></div></div>
+    <div class="space-y-3 w-full max-w-xs">
+      <button onclick="startGame(${currentGame})" class="btn-primary w-full">🔄 Chơi lại</button>
+      <button onclick="currentScreen='home';render()" class="btn-pink w-full">🏠 Về trang chủ</button>
+    </div>
+  </div>`;
+}
+
+// ===== VOCAB LIST =====
+function renderVocabList(app){
+  const topic = currentTopic ? TOPICS.find(t=>t.id===currentTopic) : null;
+  const list = currentTopic ? VOCAB.filter(v=>(v.topic||'decentralization')===currentTopic) : VOCAB;
+  app.innerHTML=`
+  <div class="min-h-full p-4 fade-in">
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center gap-3 mb-4">
+        <button onclick="currentTopic=null;currentScreen='home';render()" class="p-2 rounded-lg" style="background:#fff"><i data-lucide="arrow-left" style="width:20px;height:20px"></i></button>
+        <h2 class="text-xl font-700" style="color:var(--dark)">${topic ? topic.emoji+' '+topic.label : '📘 Tất cả từ vựng'} (${list.length} từ)</h2>
+      </div>
+      ${topic ? `<div class="rounded-xl p-3 mb-4 text-sm leading-relaxed" style="background:${topic.bg};border-left:4px solid ${topic.color};color:#333"><span style="font-weight:700;color:${topic.color}">📝 Đề bài: </span>${topic.question}</div>` : ''}
+      <input id="vocabSearch" class="input-field mb-4" placeholder="🔍 Tìm kiếm từ vựng..." oninput="filterVocab(this.value,'${currentTopic||''}')">
+      <div id="vocabContainer">${renderVocabCards(list)}</div>
+    </div>
+  </div>`;
+  lucide.createIcons();
+}
+
+function renderVocabCards(list){
+  return list.map(v=>{
+    const topic=TOPICS.find(t=>t.id===(v.topic||'decentralization'));
+    const borderColor=topic?topic.color:'var(--accent)';
+    return `
+  <div class="vocab-card card-hover fade-in" style="border-left-color:${borderColor}">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <span class="font-700 text-lg" style="color:var(--dark)">${v.en}</span>
+        <span class="ml-2 text-sm opacity-60">${v.ipa}</span>
+        <span class="tag ml-2" style="background:var(--bg)">${v.pos}</span>
+        ${!currentTopic&&topic?`<span class="tag ml-1" style="background:${topic.bg};color:${topic.color}">${topic.emoji}</span>`:''}
+      </div>
+      <button onclick="speakWord('${v.en.replace(/'/g,"\\'")}')" class="p-1 rounded-full flex-shrink-0" style="background:var(--pink)"><i data-lucide="volume-2" style="width:16px;height:16px"></i></button>
+    </div>
+    <p class="font-600 mb-1" style="color:${borderColor}">${v.vi}</p>
+    <p class="text-sm opacity-70 mb-2">${v.enDef}</p>
+    ${v.usage?`<p class="text-sm mb-2" style="color:${borderColor}">💡 ${v.usage}</p>`:''}
+    <details class="mt-2">
+      <summary class="text-sm font-600 cursor-pointer" style="color:${borderColor}">Xem chi tiết ▾</summary>
+      <div class="mt-2 space-y-1 text-sm pl-2" style="border-left:2px solid var(--bg)">
+        <p><strong>Collocations:</strong> ${v.collocations.join(', ')}</p>
+        <p><strong>Synonyms:</strong> ${v.synonyms.join(', ')}</p>
+        <p><strong>Antonyms:</strong> ${v.antonyms.join(', ')}</p>
+        <p><strong>Word family:</strong> ${v.wordFamily.join(', ')}</p>
+        <p class="mt-1 p-2 rounded-lg" style="background:#f8f9fa"><strong>Example:</strong> ${v.example}</p>
+        <p class="p-2 rounded-lg" style="background:#f0f8ff;color:${borderColor}"><strong>Dịch:</strong> ${v.exampleVi}</p>
+      </div>
+    </details>
+  </div>`;}).join('');
+}
+
+function filterVocab(term, topicId){
+  const t=term.toLowerCase();
+  const base=topicId?VOCAB.filter(v=>(v.topic||'decentralization')===topicId):VOCAB;
+  const filtered=base.filter(v=>v.en.toLowerCase().includes(t)||v.vi.toLowerCase().includes(t)||v.enDef.toLowerCase().includes(t));
+  document.getElementById('vocabContainer').innerHTML=renderVocabCards(filtered);
+  lucide.createIcons();
+}
+
+// ===== START =====
+render();
+  </script>
+ </body>
+</html>
